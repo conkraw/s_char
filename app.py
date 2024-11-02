@@ -40,8 +40,8 @@ def combine_notes(assess_text, diagnoses):
         # Load the corresponding diagnosis document
         diagnosis_doc_path = f"{diagnosis.lower().replace(' ', '')}.docx"  # Ensure proper file naming
         if os.path.exists(diagnosis_doc_path):
-            # Add numbered diagnosis
-            doc.add_paragraph(f"{i}). {diagnosis}\n")  # Add numbering
+            # Add numbered diagnosis without extra lines
+            doc.add_paragraph(f"{i}). {diagnosis}")  # Add numbering without a new line
             # Load the diagnosis document
             diagnosis_doc = Document(diagnosis_doc_path)
             for para in diagnosis_doc.paragraphs:
@@ -83,3 +83,4 @@ if option == "New Note":
 elif option == "Update Note":
     # Implement your update note functionality here as before
     pass
+

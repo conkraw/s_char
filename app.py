@@ -14,27 +14,26 @@ st.title("Update Note")
 # Text area for the note to be updated
 paragraph_text = st.text_area("Enter the text for the note you want to update:")
 
-if st.button("Submit"):
+# Options for replacement
+options = ["Continue", "Will continue", "We will continue", "We shall continue"]
+
+# Dropdowns for selecting phrases
+selected_option = st.selectbox("Select a phrase to replace:", options)
+replacement = st.selectbox("Select a replacement phrase:", options)
+
+if st.button("Replace"):
     if paragraph_text:
-        # Options for replacement
-        options = ["Continue", "Will continue", "We will continue", "We shall continue"]
-        
-        selected_option = st.selectbox("Select a phrase to replace:", options)
-        replacement = st.selectbox("Select a replacement phrase:", options)
+        # Perform replacement
+        updated_text = paragraph_text.replace(selected_option, replacement)
 
-        # Button to confirm replacement
-        if st.button("Replace"):
-            # Perform replacement
-            updated_text = paragraph_text.replace(selected_option, replacement)
+        # Display the updated note
+        st.subheader("Updated Note:")
+        st.write(updated_text)
 
-            # Display the updated note
-            st.subheader("Updated Note:")
-            st.write(updated_text)
-
-            # Create and download button for the updated note
-            word_file = create_word_doc(updated_text)
-            with open(word_file, "rb") as f:
-                st.download_button("Download Updated Note", f, file_name="updated_note.docx")
+        # Create and download button for the updated note
+        word_file = create_word_doc(updated_text)
+        with open(word_file, "rb") as f:
+            st.download_button("Download Updated Note", f, file_name="updated_note.docx")
     else:
         st.error("Please enter some text to update.")
 

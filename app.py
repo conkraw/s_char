@@ -7,22 +7,14 @@ import os
 def create_word_doc(text):
     doc = Document()
     
-    sections = text.split('\n')
-    for section in sections:
+    # Split input text into lines
+    for line in text.split('\n'):
         p = doc.add_paragraph()
-        run = p.add_run(section)
+        run = p.add_run(line)
         
         # Set font properties
         run.font.name = 'Arial'
         run.font.size = Pt(9)
-
-        # Check for "ASSESSMENT:" and "PLAN:" to apply bold and underline
-        if section.startswith("ASSESSMENT:"):
-            run.bold = True
-            run.underline = True
-        elif section.startswith("PLAN:"):
-            run.bold = True
-            run.underline = True
 
         # Set single spacing
         p.paragraph_format.space_after = Pt(0)
@@ -34,7 +26,7 @@ def create_word_doc(text):
     return output_path
 
 # Function to combine diagnosis documents with formatted input text
-def combine_notes(assess_text, plan_text, diagnoses):
+def combine_notes(assess_text, diagnoses):
     doc = Document()
     
     # Add Assessment
@@ -43,20 +35,17 @@ def combine_notes(assess_text, plan_text, diagnoses):
     assessment_run.bold = True
     assessment_run.underline = True
 
-    # Add Plan
-    plan_paragraph = doc.add_paragraph()
-    plan_run = plan_paragraph.add_run(f"PLAN:\n{plan_text}\n")
-    plan_run.bold = True
-    plan_run.underline = True
-
     # Add diagnosis documents in order
     for i, diagnosis in enumerate(diagnoses, start=1):
         # Load the corresponding diagnosis document
-        diagnosis_doc_path = f"{diagnosis.lower().replace(' ', '')}.docx"  # Make sure the files are named appropriately
+        diagnosis_doc_path = f"{diagnosis.lower().replace(' ', '')}.docx"  # Ensure proper file naming
         if os.path.exists(diagnosis_doc_path):
-            diagnosis_doc = Document(diagnosis_doc_path)
+            # Add numbered diagnosis
             doc.add_paragraph(f"{i}). {diagnosis}\n")  # Add numbering
+            # Load the diagnosis document
+            diagnosis_doc = Document(diagnosis_doc_path)
             for para in diagnosis_doc.paragraphs:
+                # Add each paragraph from the diagnosis document
                 doc.add_paragraph(para.text)
 
     output_path = "combined_note.docx"
@@ -76,14 +65,13 @@ if option == "New Note":
     conditions = ["Acute Hypoxemic Respiratory Failure", "Sepsis", "Hyponatremia"]
     selected_conditions = st.multiselect("Choose diagnoses:", conditions)
     
-    # Text areas for assessment and plan
+    # Text area for assessment
     assessment_text = st.text_area("Enter Assessment:")
-    plan_text = st.text_area("Enter Plan:")
     
     if st.button("Submit New Note"):
-        if selected_conditions and assessment_text and plan_text:
+        if selected_conditions and assessment_text:
             # Combine notes with selected diagnoses
-            combined_file = combine_notes(assessment_text, plan_text, selected_conditions)
+            combined_file = combine_notes(assessment_text, selected_conditions)
             st.success("New note created!")
 
             # Download button for the combined note

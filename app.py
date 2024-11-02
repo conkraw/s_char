@@ -47,8 +47,8 @@ def combine_notes(assess_text, diagnoses):
         # Load the corresponding diagnosis document
         diagnosis_doc_path = f"{diagnosis.lower().replace(' ', '')}.docx"  # Ensure proper file naming
         if os.path.exists(diagnosis_doc_path):
-            # Add numbered diagnosis without extra lines or symbols
-            doc.add_paragraph(f"{i}. {diagnosis}")  # Format without any additional symbols
+            # Add numbered diagnosis with desired format
+            doc.add_paragraph(f"{i}). {diagnosis}")  # Format as "1). Diagnosis"
             # Load the diagnosis document
             diagnosis_doc = Document(diagnosis_doc_path)
             for para in diagnosis_doc.paragraphs:

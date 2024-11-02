@@ -1,10 +1,15 @@
 import streamlit as st
 from docx import Document
+from docx.shared import Pt
 
-# Function to create a Word document
+# Function to create a Word document with specific font settings
 def create_word_doc(text):
     doc = Document()
-    doc.add_paragraph(text)
+    # Add a paragraph with specified font settings
+    paragraph = doc.add_paragraph()
+    run = paragraph.add_run(text)
+    run.font.name = 'Arial'
+    run.font.size = Pt(9)  # Set font size to 9
     output_path = "updated_note.docx"
     doc.save(output_path)
     return output_path

@@ -7,28 +7,29 @@ from docx.enum.text import WD_UNDERLINE
 def create_word_doc(text):
     doc = Document()
     
-    # Add "Assessment" section with bold and underline
-    assessment = doc.add_paragraph()
-    assessment_run = assessment.add_run("ASSESSMENT: ")
-    assessment_run.bold = True
-    assessment_run.underline = True
-    assessment_run.font.name = 'Arial'
-    assessment_run.font.size = Pt(9)
-    
-    # Add the assessment text
-    assessment.add_run(text)  # Add the note text here
-    
-    # Add "Plan" section with bold and underline
-    plan = doc.add_paragraph()
-    plan_run = plan.add_run("PLAN: ")
-    plan_run.bold = True
-    plan_run.underline = True
-    plan_run.font.name = 'Arial'
-    plan_run.font.size = Pt(9)
-    
-    # Add the plan text
-    plan.add_run(text)  # Add the note text here
-    
+    # Split the text to handle "ASSESSMENT:" and "PLAN:"
+    sections = text.split('\n')
+    for section in sections:
+        if section.startswith("ASSESSMENT:"):
+            p = doc.add_paragraph()
+            run = p.add_run(section)
+            run.bold = True
+            run.underline = True
+            run.font.name = 'Arial'
+            run.font.size = Pt(9)
+        elif section.startswith("PLAN:"):
+            p = doc.add_paragraph()
+            run = p.add_run(section)
+            run.bold = True
+            run.underline = True
+            run.font.name = 'Arial'
+            run.font.size = Pt(9)
+        else:
+            p = doc.add_paragraph()
+            run = p.add_run(section)
+            run.font.name = 'Arial'
+            run.font.size = Pt(9)
+
     output_path = "updated_note.docx"
     doc.save(output_path)
     return output_path
@@ -51,8 +52,8 @@ if st.button("Replace"):
         updated_text = paragraph_text.replace(selected_option, replacement)
 
         # Display the updated note
-        #st.subheader("Updated Note:")
-        #st.write(updated_text)
+        st.subheader("Updated Note:")
+        st.write(updated_text)
 
         # Create and download button for the updated note
         word_file = create_word_doc(updated_text)

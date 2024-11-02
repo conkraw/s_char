@@ -31,9 +31,12 @@ def combine_notes(assess_text, diagnoses):
     
     # Add Assessment
     assessment_paragraph = doc.add_paragraph()
-    assessment_run = assessment_paragraph.add_run(f"ASSESSMENT:\n{assess_text}\n")
+    assessment_run = assessment_paragraph.add_run("ASSESSMENT:\n")
     assessment_run.bold = True
     assessment_run.underline = True
+
+    # Add the assessment text (not bolded or underlined)
+    doc.add_paragraph(assess_text)
 
     # Add Plan heading
     plan_paragraph = doc.add_paragraph()

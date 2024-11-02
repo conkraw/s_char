@@ -48,7 +48,8 @@ def combine_notes(assess_text, diagnoses):
     plan_run.underline = True
     plan_run.font.name = 'Arial'
     plan_run.font.size = Pt(9)
-    doc.add_paragraph()  # Add a blank line after the PLAN heading
+    plan_paragraph.paragraph_format.space_after = Pt(0)  # No space after PLAN heading
+    plan_paragraph.paragraph_format.space_before = Pt(0)  # No space before PLAN heading
 
     for i, diagnosis in enumerate(diagnoses, start=1):
         diagnosis_doc_path = f"{diagnosis.lower().replace(' ', '')}.docx"
@@ -57,9 +58,9 @@ def combine_notes(assess_text, diagnoses):
             diagnosis_paragraph = doc.add_paragraph(f"{i}). {diagnosis}")
             diagnosis_paragraph.runs[0].font.size = Pt(9)
             diagnosis_paragraph.runs[0].font.name = 'Arial'
-            diagnosis_paragraph.paragraph_format.space_after = Pt(0)
-            diagnosis_paragraph.paragraph_format.space_before = Pt(0)
-            diagnosis_paragraph.paragraph_format.line_spacing = Pt(12)
+            diagnosis_paragraph.paragraph_format.space_after = Pt(0)  # No space after diagnosis
+            diagnosis_paragraph.paragraph_format.space_before = Pt(0)  # No space before diagnosis
+            diagnosis_paragraph.paragraph_format.line_spacing = Pt(12)  # Single spacing
 
             # Add the content from the diagnosis document
             diagnosis_doc = Document(diagnosis_doc_path)
@@ -68,9 +69,9 @@ def combine_notes(assess_text, diagnoses):
                 for run in new_paragraph.runs:
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
-                new_paragraph.paragraph_format.space_after = Pt(0)
-                new_paragraph.paragraph_format.space_before = Pt(0)
-                new_paragraph.paragraph_format.line_spacing = Pt(12)
+                new_paragraph.paragraph_format.space_after = Pt(0)  # No space after diagnosis content
+                new_paragraph.paragraph_format.space_before = Pt(0)  # No space before diagnosis content
+                new_paragraph.paragraph_format.line_spacing = Pt(12)  # Single spacing
 
     output_path = "combined_note.docx"
     doc.save(output_path)

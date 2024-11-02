@@ -77,8 +77,8 @@ elif option == "Update Note":
             updated_text = paragraph_text.replace(selected_option, replacement)
 
             # Display the updated note
-            st.subheader("Updated Note:")
-            st.write(updated_text)
+            #st.subheader("Updated Note:")
+            #st.write(updated_text)
 
             # Create and download button for the updated note
             word_file = create_word_doc(updated_text)

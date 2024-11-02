@@ -31,7 +31,7 @@ def combine_notes(assess_text, diagnoses):
     assessment_run.underline = True
     assessment_run.font.name = 'Arial'
     assessment_run.font.size = Pt(9)
-    doc.add_paragraph(assess_text).font.size = Pt(9)
+    doc.add_paragraph(assess_text).add_run().font.size = Pt(9)
 
     # Plan section
     plan_paragraph = doc.add_paragraph()
@@ -46,13 +46,20 @@ def combine_notes(assess_text, diagnoses):
         diagnosis_doc_path = f"{diagnosis.lower().replace(' ', '')}.docx"
         if os.path.exists(diagnosis_doc_path):
             # Add the diagnosis header
-            doc.add_paragraph(f"{i}). {diagnosis}").font.size = Pt(9)
+            diagnosis_paragraph = doc.add_paragraph(f"{i}). {diagnosis}")
+            diagnosis_paragraph.runs[0].font.size = Pt(9)
+            diagnosis_paragraph.runs[0].font.name = 'Arial'
+            diagnosis_paragraph.paragraph_format.space_after = Pt(0)
+            diagnosis_paragraph.paragraph_format.space_before = Pt(0)
+            diagnosis_paragraph.paragraph_format.line_spacing = Pt(12)
+
             # Add the content from the diagnosis document
             diagnosis_doc = Document(diagnosis_doc_path)
             for para in diagnosis_doc.paragraphs:
                 new_paragraph = doc.add_paragraph(para.text)
-                new_paragraph.font.name = 'Arial'
-                new_paragraph.font.size = Pt(9)
+                for run in new_paragraph.runs:
+                    run.font.name = 'Arial'
+                    run.font.size = Pt(9)
                 new_paragraph.paragraph_format.space_after = Pt(0)
                 new_paragraph.paragraph_format.space_before = Pt(0)
                 new_paragraph.paragraph_format.line_spacing = Pt(12)
@@ -88,5 +95,6 @@ if option == "New Note":
 elif option == "Update Note":
     # Implement your update note functionality here as before
     pass
+
 
 

@@ -38,11 +38,17 @@ def combine_notes(assess_text, diagnoses):
     assessment_content = doc.add_paragraph(assess_text)
     set_paragraph_formatting(assessment_content)
 
+    # Add a line break (without extra space) to separate sections
+    doc.add_paragraph()  # This adds a paragraph with no text, creating space without extra formatting
+
     # Plan section
     plan_paragraph = doc.add_paragraph("PLAN:")
     plan_paragraph.bold = True
     plan_paragraph.underline = True
     set_paragraph_formatting(plan_paragraph)
+
+    # Add another line break (without extra space) before diagnoses
+    doc.add_paragraph()  # Again, this separates sections without extra space
 
     for i, diagnosis in enumerate(diagnoses, start=1):
         diagnosis_doc_path = f"{diagnosis.lower().replace(' ', '')}.docx"

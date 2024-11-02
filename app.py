@@ -7,16 +7,11 @@ import os
 def create_word_doc(text):
     doc = Document()
     
-    # Split input text into lines
     for line in text.split('\n'):
         p = doc.add_paragraph()
         run = p.add_run(line)
-        
-        # Set font properties
         run.font.name = 'Arial'
         run.font.size = Pt(9)
-
-        # Set single spacing
         p.paragraph_format.space_after = Pt(0)
         p.paragraph_format.space_before = Pt(0)
         p.paragraph_format.line_spacing = Pt(12)
@@ -29,33 +24,24 @@ def create_word_doc(text):
 def combine_notes(assess_text, diagnoses):
     doc = Document()
     
-    # Add Assessment
     assessment_paragraph = doc.add_paragraph()
     assessment_run = assessment_paragraph.add_run("ASSESSMENT:\n")
     assessment_run.bold = True
     assessment_run.underline = True
-
-    # Add the assessment text (not bolded or underlined)
     doc.add_paragraph(assess_text)
 
-    # Add Plan heading
     plan_paragraph = doc.add_paragraph()
     plan_run = plan_paragraph.add_run("PLAN:")
     plan_run.bold = True
     plan_run.underline = True
     doc.add_paragraph()  # Add a blank line after the PLAN heading
 
-    # Add diagnosis documents in order
     for i, diagnosis in enumerate(diagnoses, start=1):
-        # Load the corresponding diagnosis document
-        diagnosis_doc_path = f"{diagnosis.lower().replace(' ', '')}.docx"  # Ensure proper file naming
+        diagnosis_doc_path = f"{diagnosis.lower().replace(' ', '')}.docx"
         if os.path.exists(diagnosis_doc_path):
-            # Add numbered diagnosis with desired format
-            doc.add_paragraph(f"{i}). {diagnosis}")  # Format as "1). Diagnosis"
-            # Load the diagnosis document
+            doc.add_paragraph(f"{i}). {diagnosis}")
             diagnosis_doc = Document(diagnosis_doc_path)
             for para in diagnosis_doc.paragraphs:
-                # Add each paragraph from the diagnosis document
                 doc.add_paragraph(para.text)
 
     output_path = "combined_note.docx"
@@ -71,20 +57,21 @@ option = st.sidebar.selectbox("Choose an option:", ["New Note", "Update Note"])
 if option == "New Note":
     st.header("Create a New Note")
     
-    # Multi-select for medical conditions
     conditions = ["Acute Hypoxemic Respiratory Failure", "Sepsis", "Hyponatremia"]
     selected_conditions = st.multiselect("Choose diagnoses:", conditions)
+
+    # Allow user to order selected conditions
+    ordered_conditions = st.multiselect("Order your selections (drag to reorder):", 
+                                         options=selected_conditions, 
+                                         default=selected_conditions)
     
-    # Text area for assessment
     assessment_text = st.text_area("Enter Assessment:")
     
     if st.button("Submit New Note"):
-        if selected_conditions and assessment_text:
-            # Combine notes with selected diagnoses
-            combined_file = combine_notes(assessment_text, selected_conditions)
+        if ordered_conditions and assessment_text:
+            combined_file = combine_notes(assessment_text, ordered_conditions)
             st.success("New note created!")
 
-            # Download button for the combined note
             with open(combined_file, "rb") as f:
                 st.download_button("Download Combined Note", f, file_name="combined_note.docx")
         else:

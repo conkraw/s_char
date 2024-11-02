@@ -2,33 +2,34 @@ import streamlit as st
 from docx import Document
 from docx.shared import Pt
 from docx.enum.text import WD_UNDERLINE
+from docx.oxml import OxmlElement
 
-# Function to create a Word document with specific font settings
+# Function to create a Word document with specific font settings and single spacing
 def create_word_doc(text):
     doc = Document()
     
     # Split the text to handle "ASSESSMENT:" and "PLAN:"
     sections = text.split('\n')
     for section in sections:
+        p = doc.add_paragraph()
+        run = p.add_run(section)
+        
+        # Set font properties
+        run.font.name = 'Arial'
+        run.font.size = Pt(9)
+
+        # Check for "ASSESSMENT:" and "PLAN:" to apply bold and underline
         if section.startswith("ASSESSMENT:"):
-            p = doc.add_paragraph()
-            run = p.add_run(section)
             run.bold = True
             run.underline = True
-            run.font.name = 'Arial'
-            run.font.size = Pt(9)
         elif section.startswith("PLAN:"):
-            p = doc.add_paragraph()
-            run = p.add_run(section)
             run.bold = True
             run.underline = True
-            run.font.name = 'Arial'
-            run.font.size = Pt(9)
-        else:
-            p = doc.add_paragraph()
-            run = p.add_run(section)
-            run.font.name = 'Arial'
-            run.font.size = Pt(9)
+
+        # Set single spacing
+        p.paragraph_format.space_after = Pt(0)
+        p.paragraph_format.space_before = Pt(0)
+        p.paragraph_format.line_spacing = Pt(12)  # Corresponds to single spacing
 
     output_path = "updated_note.docx"
     doc.save(output_path)

@@ -35,13 +35,20 @@ def combine_notes(assess_text, diagnoses):
     assessment_run.bold = True
     assessment_run.underline = True
 
+    # Add Plan heading
+    plan_paragraph = doc.add_paragraph()
+    plan_run = plan_paragraph.add_run("PLAN:")
+    plan_run.bold = True
+    plan_run.underline = True
+    doc.add_paragraph()  # Add a blank line after the PLAN heading
+
     # Add diagnosis documents in order
     for i, diagnosis in enumerate(diagnoses, start=1):
         # Load the corresponding diagnosis document
         diagnosis_doc_path = f"{diagnosis.lower().replace(' ', '')}.docx"  # Ensure proper file naming
         if os.path.exists(diagnosis_doc_path):
-            # Add numbered diagnosis without extra lines
-            doc.add_paragraph(f"{i}). {diagnosis}")  # Add numbering without a new line
+            # Add numbered diagnosis without extra lines or symbols
+            doc.add_paragraph(f"{i}. {diagnosis}")  # Format without any additional symbols
             # Load the diagnosis document
             diagnosis_doc = Document(diagnosis_doc_path)
             for para in diagnosis_doc.paragraphs:
@@ -83,4 +90,5 @@ if option == "New Note":
 elif option == "Update Note":
     # Implement your update note functionality here as before
     pass
+
 

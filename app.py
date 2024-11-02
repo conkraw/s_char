@@ -9,16 +9,24 @@ option = st.sidebar.selectbox("Choose an option:", ["New Note", "Update Note"])
 if option == "New Note":
     st.header("Create a New Note")
     note_text = st.text_area("Enter your note text here:")
+    
     if st.button("Submit"):
-        st.success("New note created!")
-        st.write(note_text)
+        if note_text:
+            st.success("New note created!")
+            st.write(note_text)
+        else:
+            st.error("Please enter some text for the note.")
 
 elif option == "Update Note":
     st.header("Update an Existing Note")
-    paragraph_text = st.text_area("Enter the text for the note you want to update:")
+    if 'paragraph_text' not in st.session_state:
+        st.session_state.paragraph_text = ""
+
+    paragraph_text = st.text_area("Enter the text for the note you want to update:", value=st.session_state.paragraph_text)
 
     if st.button("Submit"):
         if paragraph_text:
+            st.session_state.paragraph_text = paragraph_text  # Save the text to session state
             # Options for replacement
             options = ["Continue", "Will continue", "We will continue", "We shall continue"]
             selected_option = st.selectbox("Select a phrase to replace:", options)
@@ -34,3 +42,4 @@ elif option == "Update Note":
             st.write(updated_text)
         else:
             st.error("Please enter some text to update.")
+

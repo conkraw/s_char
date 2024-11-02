@@ -59,17 +59,12 @@ if option == "New Note":
     
     conditions = ["Acute Hypoxemic Respiratory Failure", "Sepsis", "Hyponatremia"]
     selected_conditions = st.multiselect("Choose diagnoses:", conditions)
-
-    # Allow user to order selected conditions
-    ordered_conditions = st.multiselect("Order your selections (drag to reorder):", 
-                                         options=selected_conditions, 
-                                         default=selected_conditions)
     
     assessment_text = st.text_area("Enter Assessment:")
     
     if st.button("Submit New Note"):
-        if ordered_conditions and assessment_text:
-            combined_file = combine_notes(assessment_text, ordered_conditions)
+        if selected_conditions and assessment_text:
+            combined_file = combine_notes(assessment_text, selected_conditions)
             st.success("New note created!")
 
             with open(combined_file, "rb") as f:

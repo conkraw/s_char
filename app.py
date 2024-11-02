@@ -13,7 +13,7 @@ def create_word_doc(text):
         
         # Set font properties
         run.font.name = 'Arial'
-        run.font.size = Pt(9)
+        run.font.size = Pt(10)
 
         # Check for "ASSESSMENT:" and "PLAN:" to apply bold and underline
         if section.startswith("ASSESSMENT:"):

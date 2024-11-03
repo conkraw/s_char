@@ -69,7 +69,7 @@ def combine_notes(assess_text, diagnoses):
         if os.path.exists(diagnosis_key):
             # Add the diagnosis header with enhanced formatting
             diagnosis_paragraph = doc.add_paragraph()
-            diagnosis_run = diagnosis_paragraph.add_run(f"{i}). {formatted_name}")
+            diagnosis_run = diagnosis_paragraph.add_run(f"{i}). {diagnosis}")
             #diagnosis_run.bold = True  # Bold the diagnosis
             diagnosis_run.font.size = Pt(10)  # Set font size
             diagnosis_run.font.name = 'Arial'  # Set font type
@@ -114,7 +114,7 @@ if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:
         # Map selected conditions back to original filenames
         selected_conditions_original = [diagnosis_mapping[cond] for cond in selected_conditions]
-        combined_file = combine_notes(assessment_text, selected_conditions_original)
+        combined_file = combine_notes(assessment_text, selected_conditions)
         # Use room number in the filename
         file_name = f"{room_number}.docx"
         with open(combined_file, "rb") as f:

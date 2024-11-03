@@ -41,7 +41,7 @@ def combine_notes(assess_text, diagnoses):
         run.font.size = Pt(9)
     assessment_content.paragraph_format.space_after = Pt(0)
     assessment_content.paragraph_format.space_before = Pt(0)
-    assessment_content.paragraph_format.line_spacing = Pt(12)
+    #assessment_content.paragraph_format.line_spacing = Pt(12)
 
     # Plan section
     plan_paragraph = doc.add_paragraph()

@@ -87,7 +87,7 @@ room_number = st.text_input("Enter Room Number:")
 
 conditions = ["Acute Hypoxemic Respiratory Failure", 
               "Acute Hypoxemic Respiratory Failure NIV", 
-              "Anemia"m
+              "Anemia",
               "At risk for gastric ulcers",
               "At risk for malnutrition",
               "Bronchopulmonary Dysplasia",

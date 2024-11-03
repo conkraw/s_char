@@ -6,11 +6,8 @@ import re
 
 # Function to format diagnosis names
 def format_diagnosis_name(diagnosis):
-    # Replace underscores with spaces
     diagnosis = diagnosis.replace('_', ' ')
-    # Add spaces before capital letters (camel case)
     formatted_name = re.sub(r'(?<!^)(?=[A-Z])', ' ', diagnosis)
-    # Capitalize each word
     formatted_name = formatted_name.title()
     return formatted_name
 
@@ -23,16 +20,16 @@ def create_word_doc(text):
         run = p.add_run(line)
         run.font.name = 'Arial'
         run.font.size = Pt(9)
-        p.paragraph_format.space_after = Pt(0)  # No space after paragraph
-        p.paragraph_format.space_before = Pt(0)  # No space before paragraph
-        p.paragraph_format.line_spacing = Pt(12)  # Single spacing
+        p.paragraph_format.space_after = Pt(0)
+        p.paragraph_format.space_before = Pt(0)
+        p.paragraph_format.line_spacing = Pt(12)
 
     output_path = "updated_note.docx"
     doc.save(output_path)
     return output_path
 
 # Function to combine diagnosis documents with formatted input text
-def combine_notes(assess_text, diagnoses):
+def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=None):
     doc = Document()
     
     # Assessment section
@@ -42,16 +39,13 @@ def combine_notes(assess_text, diagnoses):
     assessment_run.underline = True
     assessment_run.font.name = 'Arial'
     assessment_run.font.size = Pt(9)
-    assessment_paragraph.paragraph_format.space_after = Pt(0)  # No space after ASSESSMENT heading
+    assessment_paragraph.paragraph_format.space_after = Pt(0)
     assessment_paragraph.paragraph_format.space_before = Pt(0)
     
-    # Add the assessment text with formatting
     assessment_content = doc.add_paragraph(assess_text)
     for run in assessment_content.runs:
         run.font.name = 'Arial'
         run.font.size = Pt(9)
-    assessment_content.paragraph_format.space_after = Pt(0)
-    assessment_content.paragraph_format.space_before = Pt(0)
 
     # Plan section
     plan_paragraph = doc.add_paragraph()
@@ -60,31 +54,31 @@ def combine_notes(assess_text, diagnoses):
     plan_run.underline = True
     plan_run.font.name = 'Arial'
     plan_run.font.size = Pt(9)
-    plan_paragraph.paragraph_format.space_after = Pt(0)  # No space after PLAN heading
-    plan_paragraph.paragraph_format.space_before = Pt(0)  # No space before PLAN heading
+    plan_paragraph.paragraph_format.space_after = Pt(0)
+    plan_paragraph.paragraph_format.space_before = Pt(0)
 
+    # Add selected diagnoses
     for i, diagnosis in enumerate(diagnoses, start=1):
-        # Convert the diagnosis back to the filename format
         diagnosis_key = diagnosis.lower().replace(' ', '_') + '.docx'
         if os.path.exists(diagnosis_key):
-            # Add the diagnosis header with enhanced formatting
             diagnosis_paragraph = doc.add_paragraph()
             diagnosis_run = diagnosis_paragraph.add_run(f"{i}). {diagnosis}")
-            #diagnosis_run.bold = True  # Bold the diagnosis
-            diagnosis_run.font.size = Pt(10)  # Set font size
-            diagnosis_run.font.name = 'Arial'  # Set font type
-            diagnosis_paragraph.paragraph_format.space_after = Pt(0)  # No space after diagnosis
-            diagnosis_paragraph.paragraph_format.space_before = Pt(0)  # No space before diagnosis
+            diagnosis_run.bold = True
+            diagnosis_run.font.size = Pt(10)
+            diagnosis_run.font.name = 'Arial'
 
-            # Add the content from the diagnosis document
             diagnosis_doc = Document(diagnosis_key)
             for para in diagnosis_doc.paragraphs:
                 new_paragraph = doc.add_paragraph(para.text)
                 for run in new_paragraph.runs:
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
-                new_paragraph.paragraph_format.space_after = Pt(0)  # No space after diagnosis content
-                new_paragraph.paragraph_format.space_before = Pt(0)  # No space before diagnosis content
+
+    # Append free-text diagnosis and plan if provided
+    if free_text_diag and free_text_plan:
+        doc.add_paragraph()  # Add a blank line
+        doc.add_paragraph(f"Free Text Diagnosis: {free_text_diag}")
+        doc.add_paragraph(f"Plan: {free_text_plan}")
 
     output_path = "combined_note.docx"
     doc.save(output_path)
@@ -103,19 +97,23 @@ room_number = st.text_input("Enter Room Number:")
 available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]
 formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
 
-# Create a mapping for original document names
+# Sort the formatted conditions alphabetically
+sorted_conditions = sorted(formatted_conditions)
+
+# Create a mapping for formatted names to original filenames
 diagnosis_mapping = {format_diagnosis_name(doc): doc for doc in available_docs}
 
-selected_conditions = st.multiselect("Choose diagnoses:", sorted(formatted_conditions))
+selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
+
+# Input for free text diagnosis and plan
+free_text_diagnosis = st.text_input("Enter Free Text Diagnosis:")
+free_text_plan = st.text_area("Enter Plan for Free Text Diagnosis:")
 
 assessment_text = st.text_area("Enter Assessment:")
 
 if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:
-        # Map selected conditions back to original filenames
-        selected_conditions_original = [diagnosis_mapping[cond] for cond in selected_conditions]
-        combined_file = combine_notes(assessment_text, selected_conditions)
-        # Use room number in the filename
+        combined_file = combine_notes(assessment_text, selected_conditions, free_text_diagnosis, free_text_plan)
         file_name = f"{room_number}.docx"
         with open(combined_file, "rb") as f:
             st.download_button("Download Combined Note", f, file_name=file_name)

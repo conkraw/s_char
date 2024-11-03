@@ -26,7 +26,7 @@ def combine_notes(assess_text, diagnoses):
     
     # Assessment section
     assessment_paragraph = doc.add_paragraph()
-    assessment_run = assessment_paragraph.add_run("ASSESSMENT:\n")
+    assessment_run = assessment_paragraph.add_run("ASSESSMENT:")
     assessment_run.bold = True
     assessment_run.underline = True
     assessment_run.font.name = 'Arial'

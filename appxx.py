@@ -31,6 +31,7 @@ def create_word_doc(text):
     doc.save(output_path)
     return output_path
 
+# Function to combine diagnosis documents with formatted input text
 def combine_notes(assess_text, diagnoses):
     doc = Document()
     
@@ -63,8 +64,9 @@ def combine_notes(assess_text, diagnoses):
     plan_paragraph.paragraph_format.space_before = Pt(0)  # No space before PLAN heading
 
     for i, diagnosis in enumerate(diagnoses, start=1):
-        diagnosis_doc_path = f"{diagnosis.lower().replace(' ', '')}.docx"
-        if os.path.exists(diagnosis_doc_path):
+        # Convert the diagnosis back to the filename format
+        diagnosis_key = diagnosis.lower().replace(' ', '_') + '.docx'
+        if os.path.exists(diagnosis_key):
             # Add the diagnosis header with enhanced formatting
             diagnosis_paragraph = doc.add_paragraph()
             diagnosis_run = diagnosis_paragraph.add_run(f"{i}). {diagnosis}")
@@ -75,7 +77,7 @@ def combine_notes(assess_text, diagnoses):
             diagnosis_paragraph.paragraph_format.space_before = Pt(0)  # No space before diagnosis
 
             # Add the content from the diagnosis document
-            diagnosis_doc = Document(diagnosis_doc_path)
+            diagnosis_doc = Document(diagnosis_key)
             for para in diagnosis_doc.paragraphs:
                 new_paragraph = doc.add_paragraph(para.text)
                 for run in new_paragraph.runs:
@@ -101,14 +103,17 @@ room_number = st.text_input("Enter Room Number:")
 available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]
 formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
 
+# Create a mapping for original document names
+diagnosis_mapping = {format_diagnosis_name(doc): doc for doc in available_docs}
+
 selected_conditions = st.multiselect("Choose diagnoses:", formatted_conditions)
 
 assessment_text = st.text_area("Enter Assessment:")
 
 if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:
-        # Convert formatted conditions back to original for processing
-        selected_conditions_original = [doc.lower().replace(' ', '') for doc in selected_conditions]
+        # Map selected conditions back to original filenames
+        selected_conditions_original = [diagnosis_mapping[cond] for cond in selected_conditions]
         combined_file = combine_notes(assessment_text, selected_conditions_original)
         # Use room number in the filename
         file_name = f"{room_number}.docx"

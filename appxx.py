@@ -85,27 +85,16 @@ st.header("Create a New Note")
 # Input for room number
 room_number = st.text_input("Enter Room Number:")
 
-conditions = ["Acute Hypoxemic Respiratory Failure", 
-              "Acute Hypoxemic Respiratory Failure NIV", 
-              "Anemia",
-              "At risk for gastric ulcers",
-              "At risk for malnutrition",
-              "Bronchopulmonary Dysplasia",
-              "Constipation",
-              "Hyponatremia", 
-              "Hypokalemia", "Hypomagnesemia", "Hypophosphatemia", 
-              "Increased Gastric Tube Output", 
-              "Insomnia", "Lymphopenia", "Neutropenia", 
-              "Sepsis", "Status Asthmaticus", "Status Epilepticus", "Thrombocytopenia", "Urinary Retention", "Vitamin D Deficiency"]
-selected_conditions = st.multiselect("Choose diagnoses:", conditions)
+# Dynamically list available diagnosis documents in the current directory
+available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]
+
+selected_conditions = st.multiselect("Choose diagnoses:", available_docs)
 
 assessment_text = st.text_area("Enter Assessment:")
 
 if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:
         combined_file = combine_notes(assessment_text, selected_conditions)
-        #st.success("New note created!")
-
         # Use room number in the filename
         file_name = f"{room_number}.docx"
         with open(combined_file, "rb") as f:

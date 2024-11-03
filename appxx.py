@@ -2,6 +2,13 @@ import streamlit as st
 from docx import Document
 from docx.shared import Pt
 import os
+import re
+
+# Function to format diagnosis names
+def format_diagnosis_name(diagnosis):
+    # Replace underscores with spaces and capitalize each word
+    formatted_name = re.sub(r'(_|\b)([a-z])', lambda m: ' ' + m.group(2).upper(), diagnosis).strip()
+    return formatted_name
 
 # Function to create a Word document with specific font settings and single spacing
 def create_word_doc(text):
@@ -87,14 +94,17 @@ room_number = st.text_input("Enter Room Number:")
 
 # Dynamically list available diagnosis documents in the current directory
 available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]
+formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
 
-selected_conditions = st.multiselect("Choose diagnoses:", available_docs)
+selected_conditions = st.multiselect("Choose diagnoses:", formatted_conditions)
 
 assessment_text = st.text_area("Enter Assessment:")
 
 if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:
-        combined_file = combine_notes(assessment_text, selected_conditions)
+        # Convert formatted conditions back to original for processing
+        selected_conditions_original = [doc.lower().replace(' ', '') for doc in selected_conditions]
+        combined_file = combine_notes(assessment_text, selected_conditions_original)
         # Use room number in the filename
         file_name = f"{room_number}.docx"
         with open(combined_file, "rb") as f:

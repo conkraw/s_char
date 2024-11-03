@@ -81,10 +81,10 @@ def combine_notes(assess_text, diagnoses):
 st.title("Note Management App")
 
 # Sidebar for navigation
-option = st.sidebar.selectbox("Choose an option:", ["New Note", "Update Note"])
+#option = st.sidebar.selectbox("Choose an option:", ["New Note", "Update Note"])
 
-if option == "New Note":
-    st.header("Create a New Note")
+#if option == "New Note":
+st.header("Create a New Note")
     
     conditions = ["Acute Hypoxemic Respiratory Failure", "Sepsis", "Hyponatremia"]
     selected_conditions = st.multiselect("Choose diagnoses:", conditions)
@@ -100,8 +100,4 @@ if option == "New Note":
                 st.download_button("Download Combined Note", f, file_name="combined_note.docx")
         else:
             st.error("Please fill out all fields.")
-
-elif option == "Update Note":
-    # Implement your update note functionality here as before
-    pass
 

@@ -31,7 +31,8 @@ def combine_notes(assess_text, diagnoses):
     assessment_run.underline = True
     assessment_run.font.name = 'Arial'
     assessment_run.font.size = Pt(9)
-
+    assessment_run.paragraph_format.space_after = Pt(0)
+    
     # Add the assessment text with formatting
     assessment_content = doc.add_paragraph(assess_text)
     for run in assessment_content.runs:

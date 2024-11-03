@@ -86,18 +86,18 @@ st.title("Note Management App")
 #if option == "New Note":
 st.header("Create a New Note")
     
-    conditions = ["Acute Hypoxemic Respiratory Failure", "Sepsis", "Hyponatremia"]
-    selected_conditions = st.multiselect("Choose diagnoses:", conditions)
+conditions = ["Acute Hypoxemic Respiratory Failure", "Sepsis", "Hyponatremia"]
+selected_conditions = st.multiselect("Choose diagnoses:", conditions)
     
-    assessment_text = st.text_area("Enter Assessment:")
+assessment_text = st.text_area("Enter Assessment:")
     
-    if st.button("Submit New Note"):
-        if selected_conditions and assessment_text:
-            combined_file = combine_notes(assessment_text, selected_conditions)
-            st.success("New note created!")
+if st.button("Submit New Note"):
+    if selected_conditions and assessment_text:
+        combined_file = combine_notes(assessment_text, selected_conditions)
+        st.success("New note created!")
 
-            with open(combined_file, "rb") as f:
-                st.download_button("Download Combined Note", f, file_name="combined_note.docx")
-        else:
-            st.error("Please fill out all fields.")
+        with open(combined_file, "rb") as f:
+            st.download_button("Download Combined Note", f, file_name="combined_note.docx")
+    else:
+        st.error("Please fill out all fields.")
 

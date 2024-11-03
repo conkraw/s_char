@@ -31,7 +31,6 @@ def create_word_doc(text):
     doc.save(output_path)
     return output_path
 
-# Function to combine diagnosis documents with formatted input text
 def combine_notes(assess_text, diagnoses):
     doc = Document()
     
@@ -66,10 +65,12 @@ def combine_notes(assess_text, diagnoses):
     for i, diagnosis in enumerate(diagnoses, start=1):
         diagnosis_doc_path = f"{diagnosis.lower().replace(' ', '')}.docx"
         if os.path.exists(diagnosis_doc_path):
-            # Add the diagnosis header
-            diagnosis_paragraph = doc.add_paragraph(f"{i}). {diagnosis}")
-            diagnosis_paragraph.runs[0].font.size = Pt(9)
-            diagnosis_paragraph.runs[0].font.name = 'Arial'
+            # Add the diagnosis header with enhanced formatting
+            diagnosis_paragraph = doc.add_paragraph()
+            diagnosis_run = diagnosis_paragraph.add_run(f"{i}). {diagnosis}")
+            diagnosis_run.bold = True  # Bold the diagnosis
+            diagnosis_run.font.size = Pt(10)  # Set font size
+            diagnosis_run.font.name = 'Arial'  # Set font type
             diagnosis_paragraph.paragraph_format.space_after = Pt(0)  # No space after diagnosis
             diagnosis_paragraph.paragraph_format.space_before = Pt(0)  # No space before diagnosis
 

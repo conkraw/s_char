@@ -41,7 +41,6 @@ def combine_notes(assess_text, diagnoses):
         run.font.size = Pt(9)
     assessment_content.paragraph_format.space_after = Pt(0)
     assessment_content.paragraph_format.space_before = Pt(0)
-    #assessment_content.paragraph_format.line_spacing = Pt(12)
 
     # Plan section
     plan_paragraph = doc.add_paragraph()
@@ -62,7 +61,6 @@ def combine_notes(assess_text, diagnoses):
             diagnosis_paragraph.runs[0].font.name = 'Arial'
             diagnosis_paragraph.paragraph_format.space_after = Pt(0)  # No space after diagnosis
             diagnosis_paragraph.paragraph_format.space_before = Pt(0)  # No space before diagnosis
-            diagnosis_paragraph.paragraph_format.line_spacing = Pt(12)  # Single spacing
 
             # Add the content from the diagnosis document
             diagnosis_doc = Document(diagnosis_doc_path)
@@ -73,7 +71,6 @@ def combine_notes(assess_text, diagnoses):
                     run.font.size = Pt(9)
                 new_paragraph.paragraph_format.space_after = Pt(0)  # No space after diagnosis content
                 new_paragraph.paragraph_format.space_before = Pt(0)  # No space before diagnosis content
-                new_paragraph.paragraph_format.line_spacing = Pt(12)  # Single spacing
 
     output_path = "combined_note.docx"
     doc.save(output_path)
@@ -82,24 +79,27 @@ def combine_notes(assess_text, diagnoses):
 # Title of the app
 st.title("Note Management App")
 
-# Sidebar for navigation
-#option = st.sidebar.selectbox("Choose an option:", ["New Note", "Update Note"])
-
-#if option == "New Note":
+# Header for the New Note section
 st.header("Create a New Note")
-    
+
+# Input for room number
+room_number = st.text_input("Enter Room Number:")
+
 conditions = ["Acute Hypoxemic Respiratory Failure", "Sepsis", "Hyponatremia"]
 selected_conditions = st.multiselect("Choose diagnoses:", conditions)
-    
+
 assessment_text = st.text_area("Enter Assessment:")
-    
+
 if st.button("Submit New Note"):
-    if selected_conditions and assessment_text:
+    if selected_conditions and assessment_text and room_number:
         combined_file = combine_notes(assessment_text, selected_conditions)
         st.success("New note created!")
 
+        # Use room number in the filename
+        file_name = f"{room_number}.docx"
         with open(combined_file, "rb") as f:
-            st.download_button("Download Combined Note", f, file_name="combined_note.docx")
+            st.download_button("Download Combined Note", f, file_name=file_name)
     else:
         st.error("Please fill out all fields.")
+
 

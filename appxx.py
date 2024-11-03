@@ -113,7 +113,7 @@ assessment_text = st.text_area("Enter Assessment:")
 
 if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:
-        combined_file = combine_notes(assessment_text, selected_conditions, free_text_diagnosis, free_text_plan)
+        combined_file = combine_notes(assessment_text, selected_conditions, free_text_diagnosis) #free_text_plan)
         file_name = f"{room_number}.docx"
         with open(combined_file, "rb") as f:
             st.download_button("Download Combined Note", f, file_name=file_name)

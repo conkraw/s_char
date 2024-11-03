@@ -3,18 +3,22 @@ from docx import Document
 from docx.shared import Pt
 import os
 
+# Function to set paragraph formatting for single spacing and font style
+def set_paragraph_formatting(paragraph):
+    paragraph.paragraph_format.space_after = Pt(0)  # No space after
+    paragraph.paragraph_format.space_before = Pt(0)  # No space before
+    paragraph.paragraph_format.line_spacing = Pt(12)  # Single spacing
+    for run in paragraph.runs:
+        run.font.name = 'Arial'
+        run.font.size = Pt(9)
+
 # Function to create a Word document with specific font settings and single spacing
 def create_word_doc(text):
     doc = Document()
     
     for line in text.split('\n'):
-        p = doc.add_paragraph()
-        run = p.add_run(line)
-        run.font.name = 'Arial'
-        run.font.size = Pt(9)
-        p.paragraph_format.space_after = Pt(0)  # No space after paragraph
-        p.paragraph_format.space_before = Pt(0)  # No space before paragraph
-        p.paragraph_format.line_spacing = Pt(12)  # Single spacing
+        p = doc.add_paragraph(line)
+        set_paragraph_formatting(p)
 
     output_path = "updated_note.docx"
     doc.save(output_path)
@@ -25,54 +29,39 @@ def combine_notes(assess_text, diagnoses):
     doc = Document()
     
     # Assessment section
-    assessment_paragraph = doc.add_paragraph()
-    assessment_run = assessment_paragraph.add_run("ASSESSMENT:\n")
-    assessment_run.bold = True
-    assessment_run.underline = True
-    assessment_run.font.name = 'Arial'
-    assessment_run.font.size = Pt(9)
-    assessment_run.paragraph_format.space_after = Pt(0)
-    
-    # Add the assessment text with formatting
+    assessment_paragraph = doc.add_paragraph("ASSESSMENT:")
+    assessment_paragraph.bold = True
+    assessment_paragraph.underline = True
+    set_paragraph_formatting(assessment_paragraph)
+
+    # Add the assessment text
     assessment_content = doc.add_paragraph(assess_text)
-    for run in assessment_content.runs:
-        run.font.name = 'Arial'
-        run.font.size = Pt(9)
-    assessment_content.paragraph_format.space_after = Pt(0)
-    assessment_content.paragraph_format.space_before = Pt(0)
-    assessment_content.paragraph_format.line_spacing = Pt(12)
+    set_paragraph_formatting(assessment_content)
+
+    # Add a line break (without extra space) to separate sections
+    doc.add_paragraph()  # This adds a paragraph with no text
 
     # Plan section
-    plan_paragraph = doc.add_paragraph()
-    plan_run = plan_paragraph.add_run("PLAN:")
-    plan_run.bold = True
-    plan_run.underline = True
-    plan_run.font.name = 'Arial'
-    plan_run.font.size = Pt(9)
-    plan_paragraph.paragraph_format.space_after = Pt(0)  # No space after PLAN heading
-    plan_paragraph.paragraph_format.space_before = Pt(0)  # No space before PLAN heading
+    plan_paragraph = doc.add_paragraph("PLAN:")
+    plan_paragraph.bold = True
+    plan_paragraph.underline = True
+    set_paragraph_formatting(plan_paragraph)
+
+    # Add another line break (without extra space) before diagnoses
+    doc.add_paragraph()  # Again, this separates sections without extra space
 
     for i, diagnosis in enumerate(diagnoses, start=1):
         diagnosis_doc_path = f"{diagnosis.lower().replace(' ', '')}.docx"
         if os.path.exists(diagnosis_doc_path):
             # Add the diagnosis header
             diagnosis_paragraph = doc.add_paragraph(f"{i}). {diagnosis}")
-            diagnosis_paragraph.runs[0].font.size = Pt(9)
-            diagnosis_paragraph.runs[0].font.name = 'Arial'
-            diagnosis_paragraph.paragraph_format.space_after = Pt(0)  # No space after diagnosis
-            diagnosis_paragraph.paragraph_format.space_before = Pt(0)  # No space before diagnosis
-            diagnosis_paragraph.paragraph_format.line_spacing = Pt(12)  # Single spacing
+            set_paragraph_formatting(diagnosis_paragraph)
 
             # Add the content from the diagnosis document
             diagnosis_doc = Document(diagnosis_doc_path)
             for para in diagnosis_doc.paragraphs:
                 new_paragraph = doc.add_paragraph(para.text)
-                for run in new_paragraph.runs:
-                    run.font.name = 'Arial'
-                    run.font.size = Pt(9)
-                new_paragraph.paragraph_format.space_after = Pt(0)  # No space after diagnosis content
-                new_paragraph.paragraph_format.space_before = Pt(0)  # No space before diagnosis content
-                new_paragraph.paragraph_format.line_spacing = Pt(12)  # Single spacing
+                set_paragraph_formatting(new_paragraph)
 
     output_path = "combined_note.docx"
     doc.save(output_path)
@@ -81,10 +70,7 @@ def combine_notes(assess_text, diagnoses):
 # Title of the app
 st.title("Note Management App")
 
-# Sidebar for navigation
-#option = st.sidebar.selectbox("Choose an option:", ["New Note", "Update Note"])
-
-#if option == "New Note":
+# Header for the New Note section
 st.header("Create a New Note")
     
 conditions = ["Acute Hypoxemic Respiratory Failure", "Sepsis", "Hyponatremia"]
@@ -101,4 +87,5 @@ if st.button("Submit New Note"):
             st.download_button("Download Combined Note", f, file_name="combined_note.docx")
     else:
         st.error("Please fill out all fields.")
+
 

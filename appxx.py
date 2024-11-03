@@ -106,7 +106,7 @@ formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
 # Create a mapping for original document names
 diagnosis_mapping = {format_diagnosis_name(doc): doc for doc in available_docs}
 
-selected_conditions = st.multiselect("Choose diagnoses:", formatted_conditions)
+selected_conditions = st.multiselect("Choose diagnoses:", sorted(formatted_conditions))
 
 assessment_text = st.text_area("Enter Assessment:")
 

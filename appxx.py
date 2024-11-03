@@ -106,8 +106,8 @@ diagnosis_mapping = {format_diagnosis_name(doc): doc for doc in available_docs}
 selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
 
 # Input for free text diagnosis and plan
-free_text_diagnosis = st.text_input("Enter Free Text Diagnosis:")
-free_text_plan = st.text_area("Enter Plan for Free Text Diagnosis:")
+#free_text_diagnosis = st.text_input("Enter Free Text Diagnosis:")
+#free_text_plan = st.text_area("Enter Plan for Free Text Diagnosis:")
 
 assessment_text = st.text_area("Enter Assessment:")
 

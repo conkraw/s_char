@@ -85,7 +85,18 @@ st.header("Create a New Note")
 # Input for room number
 room_number = st.text_input("Enter Room Number:")
 
-conditions = ["Acute Hypoxemic Respiratory Failure", "Acute Hypoxemic Respiratory Failure NIV", "Hyponatremia", "Hypokalemia", "Hypophosphatemia", "Sepsis"]
+conditions = ["Acute Hypoxemic Respiratory Failure", 
+              "Acute Hypoxemic Respiratory Failure NIV", 
+              "Anemia"m
+              "At risk for gastric ulcers",
+              "At risk for malnutrition",
+              "Bronchopulmonary Dysplasia",
+              "Constipation",
+              "Hyponatremia", 
+              "Hypokalemia", "Hypomagnesemia", "Hypophosphatemia", 
+              "Increased Gastric Tube Output", 
+              "Insomnia", "Lymphopenia", "Neutropenia", 
+              "Sepsis", "Status Asthmaticus", "Status Epilepticus", "Thrombocytopenia", "Urinary Retention", "Vitamin D Deficiency"]
 selected_conditions = st.multiselect("Choose diagnoses:", conditions)
 
 assessment_text = st.text_area("Enter Assessment:")

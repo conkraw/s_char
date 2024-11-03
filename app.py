@@ -36,12 +36,20 @@ def create_word_doc(text):
 st.title("Note Management App")
 
 st.header("Update an Existing Note")
+
+room_input = st.text_area("Enter Room Number:")
     
 paragraph_text = st.text_area("Enter the text for the note you want to update:")
 
 options = ["Continue", "Will continue", "We will continue", "We shall continue"]
-selected_option = st.selectbox("Select a phrase to replace:", options)
-replacement = st.selectbox("Select a replacement phrase:", options)
+
+cols = col1, col2
+
+col1:
+    selected_option = st.selectbox("Select a phrase to replace:", options)
+
+col2:
+    replacement = st.selectbox("Select a replacement phrase:", options)
 
 if st.button("Replace"):
     if paragraph_text:
@@ -49,7 +57,7 @@ if st.button("Replace"):
         updated_text = paragraph_text.replace(selected_option, replacement)
         word_file = create_word_doc(updated_text)
         with open(word_file, "rb") as f:
-            st.download_button("Download Updated Note", f, file_name="updated_note.docx")
+            st.download_button("Download Updated Note", f, file_name="u{room_input}.docx")
     else:
         st.error("Please enter some text to update.")
 

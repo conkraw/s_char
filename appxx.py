@@ -93,7 +93,7 @@ assessment_text = st.text_area("Enter Assessment:")
 if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:
         combined_file = combine_notes(assessment_text, selected_conditions)
-        st.success("New note created!")
+        #st.success("New note created!")
 
         # Use room number in the filename
         file_name = f"{room_number}.docx"

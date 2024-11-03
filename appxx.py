@@ -22,7 +22,7 @@ def create_word_doc(text):
         run.font.size = Pt(9)
         p.paragraph_format.space_after = Pt(0)
         p.paragraph_format.space_before = Pt(0)
-        p.paragraph_format.line_spacing = Pt(12)
+        #p.paragraph_format.line_spacing = Pt(12)
 
     output_path = "updated_note.docx"
     doc.save(output_path)

@@ -70,7 +70,7 @@ def combine_notes(assess_text, diagnoses):
             # Add the diagnosis header with enhanced formatting
             diagnosis_paragraph = doc.add_paragraph()
             diagnosis_run = diagnosis_paragraph.add_run(f"{i}). {diagnosis}")
-            diagnosis_run.bold = True  # Bold the diagnosis
+            #diagnosis_run.bold = True  # Bold the diagnosis
             diagnosis_run.font.size = Pt(10)  # Set font size
             diagnosis_run.font.name = 'Arial'  # Set font type
             diagnosis_paragraph.paragraph_format.space_after = Pt(0)  # No space after diagnosis

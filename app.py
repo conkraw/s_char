@@ -37,18 +37,18 @@ st.title("Note Management App")
 
 st.header("Update an Existing Note")
 
-room_input = st.text_area("Enter Room Number:")
-    
+room_input = st.text_input("Enter Room Number:")
 paragraph_text = st.text_area("Enter the text for the note you want to update:")
 
 options = ["Continue", "Will continue", "We will continue", "We shall continue"]
 
-cols = col1, col2
+# Columns for the selectboxes
+col1, col2 = st.columns(2)
 
-col1:
+with col1:
     selected_option = st.selectbox("Select a phrase to replace:", options)
 
-col2:
+with col2:
     replacement = st.selectbox("Select a replacement phrase:", options)
 
 if st.button("Replace"):
@@ -56,8 +56,15 @@ if st.button("Replace"):
         # Perform replacement
         updated_text = paragraph_text.replace(selected_option, replacement)
         word_file = create_word_doc(updated_text)
+        
+        # Ensure room input is valid for filename
+        if room_input:
+            file_name = f"u_{room_input}.docx"
+        else:
+            file_name = "updated_note.docx"
+
         with open(word_file, "rb") as f:
-            st.download_button("Download Updated Note", f, file_name="u{room_input}.docx")
+            st.download_button("Download Updated Note", f, file_name=file_name)
     else:
         st.error("Please enter some text to update.")
 

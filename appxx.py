@@ -6,8 +6,12 @@ import re
 
 # Function to format diagnosis names
 def format_diagnosis_name(diagnosis):
-    # Replace underscores with spaces and capitalize each word
-    formatted_name = re.sub(r'(_|\b)([a-z])', lambda m: ' ' + m.group(2).upper(), diagnosis).strip()
+    # Replace underscores with spaces
+    diagnosis = diagnosis.replace('_', ' ')
+    # Add spaces before capital letters (camel case)
+    formatted_name = re.sub(r'(?<!^)(?=[A-Z])', ' ', diagnosis)
+    # Capitalize each word
+    formatted_name = formatted_name.title()
     return formatted_name
 
 # Function to create a Word document with specific font settings and single spacing
@@ -111,5 +115,4 @@ if st.button("Submit New Note"):
             st.download_button("Download Combined Note", f, file_name=file_name)
     else:
         st.error("Please fill out all fields.")
-
 

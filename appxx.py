@@ -66,8 +66,6 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
             #diagnosis_run.bold = True
             diagnosis_run.font.size = Pt(10)
             diagnosis_run.font.name = 'Arial'
-            diagnosis_run.paragraph_format.space_after = Pt(0)
-            diagnosis_run.paragraph_format.space_before = Pt(0)
             
             diagnosis_doc = Document(diagnosis_key)
             for para in diagnosis_doc.paragraphs:
@@ -75,7 +73,9 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
                 for run in new_paragraph.runs:
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
-
+                    run.paragraph_format.space_after = Pt(0)
+                    run.paragraph_format.space_before = Pt(0)
+            
     # Append free-text diagnosis and plan if provided
     if free_text_diag and free_text_plan:
         doc.add_paragraph()  # Add a blank line

@@ -63,10 +63,12 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
         if os.path.exists(diagnosis_key):
             diagnosis_paragraph = doc.add_paragraph()
             diagnosis_run = diagnosis_paragraph.add_run(f"{i}). {diagnosis}")
-            diagnosis_run.bold = True
+            #diagnosis_run.bold = True
             diagnosis_run.font.size = Pt(10)
             diagnosis_run.font.name = 'Arial'
-
+            diagnosis_run.paragraph_format.space_after = Pt(0)
+            diagnosis_run.paragraph_format.space_before = Pt(0)
+            
             diagnosis_doc = Document(diagnosis_key)
             for para in diagnosis_doc.paragraphs:
                 new_paragraph = doc.add_paragraph(para.text)

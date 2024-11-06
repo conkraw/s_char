@@ -178,13 +178,13 @@ selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
 # Input for assessment
 assessment_text = st.text_area("Enter Assessment:")
 
-if physical_exam_text:
-    st.subheader(f"Loaded Document: {selected_exam}")
-    st.text_area("Physical Exam Content:", physical_exam_text, height=300)
+#if physical_exam_text:
+    #st.subheader(f"Loaded Document: {selected_exam}")
+    #st.text_area("Physical Exam Content:", physical_exam_text, height=300)
 
 if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:
-        combined_file = combine_notes(assessment_text, selected_conditions, physical_exam_text)  # Add free_text_diag, free_text_plan if needed
+        combined_file = combine_notes(physical_exam_text, assessment_text, selected_conditions)  # Add free_text_diag, free_text_plan if needed
         file_name = f"{room_number}.docx"
         with open(combined_file, "rb") as f:
             st.download_button("Download Combined Note", f, file_name=file_name)

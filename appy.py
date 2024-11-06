@@ -62,7 +62,7 @@ def read_github_doc(github_url):
         return None
 
 # Function to combine diagnosis documents with formatted input text
-def combine_notes(assess_text, diagnoses, physical_exam_text, free_text_diag=None, free_text_plan=None):
+def combine_notes(physical_exam_text, assess_text, diagnoses,free_text_diag=None, free_text_plan=None):
     doc = Document()
     
     # Assessment section

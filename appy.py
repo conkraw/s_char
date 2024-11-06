@@ -68,14 +68,13 @@ def combine_notes(physical_exam_text, assess_text, diagnoses, free_text_diag=Non
     # Physical Exam Section (first)
     if physical_exam_text:
         physical_exam_paragraph = doc.add_paragraph()
-        physical_exam_run = physical_exam_paragraph.add_run("PHYSICAL EXAM:")
         physical_exam_run.bold = True
         physical_exam_run.underline = True
         physical_exam_run.font.name = 'Arial'
         physical_exam_run.font.size = Pt(9)
-        physical_exam_paragraph.paragraph_format.space_after = Pt(0)
         physical_exam_paragraph.paragraph_format.space_before = Pt(0)
-        
+        physical_exam_paragraph.paragraph_format.space_after = Pt(0)
+
         # Add the content of the physical exam document
         doc.add_paragraph(physical_exam_text)
 

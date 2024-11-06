@@ -62,10 +62,24 @@ def read_github_doc(github_url):
         return None
 
 # Function to combine diagnosis documents with formatted input text
-def combine_notes(physical_exam_text, assess_text, diagnoses,free_text_diag=None, free_text_plan=None):
+def combine_notes(physical_exam_text, assess_text, diagnoses, free_text_diag=None, free_text_plan=None):
     doc = Document()
-    
-    # Assessment section
+
+    # Physical Exam Section (first)
+    if physical_exam_text:
+        physical_exam_paragraph = doc.add_paragraph()
+        physical_exam_run = physical_exam_paragraph.add_run("PHYSICAL EXAM:")
+        physical_exam_run.bold = True
+        physical_exam_run.underline = True
+        physical_exam_run.font.name = 'Arial'
+        physical_exam_run.font.size = Pt(9)
+        physical_exam_paragraph.paragraph_format.space_after = Pt(0)
+        physical_exam_paragraph.paragraph_format.space_before = Pt(0)
+        
+        # Add the content of the physical exam document
+        doc.add_paragraph(physical_exam_text)
+
+    # Assessment Section (second)
     assessment_paragraph = doc.add_paragraph()
     assessment_run = assessment_paragraph.add_run("ASSESSMENT:")
     assessment_run.bold = True
@@ -80,21 +94,7 @@ def combine_notes(physical_exam_text, assess_text, diagnoses,free_text_diag=None
         run.font.name = 'Arial'
         run.font.size = Pt(9)
 
-    # Add Physical Exam Section if document was selected
-    if physical_exam_text:
-        physical_exam_paragraph = doc.add_paragraph()
-        physical_exam_run = physical_exam_paragraph.add_run("PHYSICAL EXAM:")
-        physical_exam_run.bold = True
-        physical_exam_run.underline = True
-        physical_exam_run.font.name = 'Arial'
-        physical_exam_run.font.size = Pt(9)
-        physical_exam_paragraph.paragraph_format.space_after = Pt(0)
-        physical_exam_paragraph.paragraph_format.space_before = Pt(0)
-        
-        # Add the content of the physical exam document
-        doc.add_paragraph(physical_exam_text)
-
-    # Plan section
+    # Plan Section (third)
     plan_paragraph = doc.add_paragraph()
     plan_run = plan_paragraph.add_run("PLAN:")
     plan_run.bold = True
@@ -104,7 +104,7 @@ def combine_notes(physical_exam_text, assess_text, diagnoses,free_text_diag=None
     plan_paragraph.paragraph_format.space_after = Pt(0)
     plan_paragraph.paragraph_format.space_before = Pt(0)
 
-    # Add selected diagnoses
+    # Add selected diagnoses (from the list)
     for i, diagnosis in enumerate(diagnoses, start=1):
         diagnosis_key = diagnosis.lower().replace(' ', '_') + '.docx'
         if os.path.exists(diagnosis_key):
@@ -145,7 +145,7 @@ st.header("Create a New Note")
 room_number = st.text_input("Enter Room Number:")
 
 # GitHub repo info
-github_repo = "conkraw/s_char"  # Replace with your actual GitHub repository
+github_repo = "yourusername/yourrepository"  # Replace with your actual GitHub repository
 folder_path = "physicalexam"  # Folder in your GitHub repo containing the exam documents
 
 # Fetch the list of available documents from GitHub
@@ -178,9 +178,9 @@ selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
 # Input for assessment
 assessment_text = st.text_area("Enter Assessment:")
 
-#if physical_exam_text:
-    #st.subheader(f"Loaded Document: {selected_exam}")
-    #st.text_area("Physical Exam Content:", physical_exam_text, height=300)
+if physical_exam_text:
+    st.subheader(f"Loaded Document: {selected_exam}")
+    st.text_area("Physical Exam Content:", physical_exam_text, height=300)
 
 if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:

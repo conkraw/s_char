@@ -74,9 +74,6 @@ def combine_notes(physical_exam_text, assess_text, diagnoses, free_text_diag=Non
         physical_exam_paragraph.paragraph_format.space_before = Pt(0)
         physical_exam_paragraph.paragraph_format.space_after = Pt(0)
 
-        # Add the content of the physical exam document
-        doc.add_paragraph(physical_exam_text)
-
     # Assessment Section (second)
     assessment_paragraph = doc.add_paragraph()
     assessment_run = assessment_paragraph.add_run("ASSESSMENT:")
@@ -104,8 +101,8 @@ def combine_notes(physical_exam_text, assess_text, diagnoses, free_text_diag=Non
 
     # Add selected diagnoses (from the list)
     for i, diagnosis in enumerate(diagnoses, start=1):
-        diagnosis_key = diagnosis.lower().replace(' ', '_') + '.docx'
-        if os.path.exists(diagnosis_key):
+        diagnosis_key = diagnosis_mapping.get(diagnosis)  # Get the original file name
+        if diagnosis_key and os.path.exists(diagnosis_key):
             diagnosis_paragraph = doc.add_paragraph()
             diagnosis_run = diagnosis_paragraph.add_run(f"{i}). {diagnosis}")
             diagnosis_run.font.size = Pt(9)
@@ -149,17 +146,18 @@ folder_path = "physicalexam"  # Folder in your GitHub repo containing the exam d
 # Fetch the list of available documents from GitHub
 available_exam_docs = get_github_docs_list(github_repo, folder_path)
 
-# Allow user to select a physical exam document from the available list
-if available_exam_docs:
-    selected_exam = st.selectbox("Select a Physical Exam Document:", available_exam_docs)
-else:
+# Check if there are available exam documents
+if not available_exam_docs:
     st.warning("No exam documents found in the specified folder.")
+else:
+    # Allow user to select a physical exam document from the available list
+    selected_exam = st.selectbox("Select a Physical Exam Document:", available_exam_docs)
 
-# Fetch the content of the selected physical exam document
-physical_exam_text = None
-if selected_exam:
-    github_url = f"https://raw.githubusercontent.com/{github_repo}/main/{folder_path}/{selected_exam}"
-    physical_exam_text = read_github_doc(github_url)
+    # Fetch the content of the selected physical exam document
+    physical_exam_text = None
+    if selected_exam:
+        github_url = f"https://raw.githubusercontent.com/{github_repo}/main/{folder_path}/{selected_exam}"
+        physical_exam_text = read_github_doc(github_url)
 
 # Dynamically list available diagnosis documents in the current directory
 available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx') and f != selected_exam]  # Exclude selected exam doc
@@ -171,16 +169,24 @@ sorted_conditions = sorted(formatted_conditions)
 # Create a mapping for formatted names to original filenames
 diagnosis_mapping = {format_diagnosis_name(doc): doc for doc in available_docs}
 
+# Allow user to select diagnoses
 selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
 
 # Input for assessment
 assessment_text = st.text_area("Enter Assessment:")
 
+# Handle form submission
 if st.button("Submit New Note"):
-    if selected_conditions and assessment_text and room_number:
+    if not room_number:
+        st.error("Room number is required.")
+    elif not selected_conditions:
+        st.error("Please select at least one diagnosis.")
+    elif not assessment_text:
+        st.error("Assessment text is required.")
+    elif not physical_exam_text:
+        st.error("Physical exam text is required.")
+    else:
         combined_file = combine_notes(physical_exam_text, assessment_text, selected_conditions)  # Add free_text_diag, free_text_plan if needed
         file_name = f"{room_number}.docx"
         with open(combined_file, "rb") as f:
             st.download_button("Download Combined Note", f, file_name=file_name)
-    else:
-        st.error("Please fill out all fields.")

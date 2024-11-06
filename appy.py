@@ -145,7 +145,7 @@ st.header("Create a New Note")
 room_number = st.text_input("Enter Room Number:")
 
 # GitHub repo info
-github_repo = "yourusername/yourrepository"  # Replace with your actual GitHub repository
+github_repo = "conkraw/s_char"  # Replace with your actual GitHub repository
 folder_path = "physicalexam"  # Folder in your GitHub repo containing the exam documents
 
 # Fetch the list of available documents from GitHub

@@ -42,25 +42,19 @@ def create_word_doc(text, ros_text, physical_exam_text):
     # Now we handle the "OBJECTIVE:" section and the rest of the physical exam content
     physical_exam_lines = physical_exam_text.split("\n")
     
-    # Add "OBJECTIVE:" as a bold and underlined section
-    objective_paragraph = doc.add_paragraph()
-    objective_run = objective_paragraph.add_run("OBJECTIVE:")  # Adding OBJECTIVE: header
+    # Add "OBJECTIVE:" directly to the same paragraph as the content
+    physical_exam_paragraph = doc.add_paragraph()
+    objective_run = physical_exam_paragraph.add_run("OBJECTIVE: ")  # Adding OBJECTIVE: header
     objective_run.bold = True
     objective_run.underline = True
     objective_run.font.name = 'Arial'
     objective_run.font.size = Pt(9)
-    
-    # Add the rest of the physical exam text
+
+    # Add the rest of the physical exam content in the same paragraph
     for line in physical_exam_lines:
-        p = doc.add_paragraph()
-        run = p.add_run(line)
+        run = physical_exam_paragraph.add_run("\n" + line)
         run.font.name = 'Arial'
         run.font.size = Pt(9)
-
-        # Set single spacing for physical exam section
-        p.paragraph_format.space_after = Pt(0)
-        p.paragraph_format.space_before = Pt(0)
-        p.paragraph_format.line_spacing = Pt(0)
 
     # Process the rest of the text passed into the function
     sections = text.split('\n')

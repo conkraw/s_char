@@ -112,12 +112,40 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
         # Add the fetched content under the REVIEW OF SYSTEMS section
         if ros_doc:
             for para in ros_doc.paragraphs:
-                new_paragraph = doc.add_paragraph(para.text)
-                new_paragraph.paragraph_format.space_after = Pt(0)
-                new_paragraph.paragraph_format.space_before = Pt(0)
-                for run in new_paragraph.runs:
+                new_paragraph = doc.add_paragraph()
+                
+                # Split the paragraph text by the target phrases and apply formatting to those specific phrases
+                text = para.text
+                text_chunks = []
+                
+                # Check and split for "OVERNIGHT EVENTS"
+                if "OVERNIGHT EVENTS" in text:
+                    text_chunks.extend(text.split("OVERNIGHT EVENTS"))
+                    text_chunks.insert(1, "OVERNIGHT EVENTS")
+                else:
+                    text_chunks.append(text)
+
+                # Now handle applying bold/underline to "OVERNIGHT EVENTS" and "SUBJECTIVE"
+                formatted_text = []
+                for chunk in text_chunks:
+                    if chunk == "OVERNIGHT EVENTS":
+                        # Apply bold and underline only to "OVERNIGHT EVENTS"
+                        run = new_paragraph.add_run(chunk)
+                        run.bold = True
+                        run.underline = True
+                    elif "SUBJECTIVE" in chunk:
+                        # Apply bold and underline to "SUBJECTIVE"
+                        run = new_paragraph.add_run(chunk)
+                        run.bold = True
+                        run.underline = True
+                    else:
+                        # For normal text, just add as-is
+                        run = new_paragraph.add_run(chunk)
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
+                
+                new_paragraph.paragraph_format.space_after = Pt(0)
+                new_paragraph.paragraph_format.space_before = Pt(0)
 
             last_paragraph = doc.add_paragraph()  # Add an empty paragraph
             last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
@@ -212,6 +240,7 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
     output_path = "combined_note.docx"
     doc.save(output_path)
     return output_path
+
 
 # Title of the app
 st.title("Note Management App")

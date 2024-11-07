@@ -95,6 +95,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     # Add Review of Systems section if a ROS file is selected (not empty)
     if ros_file != "None.docx":
         ros_paragraph = doc.add_paragraph()
+        newparagraph = doc.add_paragraph()
         ros_paragraph.paragraph_format.space_after = Pt(0)
         ros_paragraph.paragraph_format.space_before = Pt(0)
         

@@ -119,24 +119,6 @@ with col1:
 with col2:
     replacement = st.selectbox("Select a replacement phrase:", options)
 
-# Allow file uploads for the selected ROS and Physical Exam
-ros_file = st.file_uploader(f"Upload selected ROS file ({ros_selection})", type=["docx"])
-physical_exam_file = st.file_uploader(f"Upload selected Physical Exam file ({physical_exam_selection})", type=["docx"])
-
-# If files are uploaded, read their content
-ros_text = ""
-physical_exam_text = ""
-
-if ros_file:
-    ros_text = read_docx_from_bytes(ros_file.read())
-    st.write("### Selected ROS Content:")
-    st.text_area("ROS Text", ros_text, height=200)
-
-if physical_exam_file:
-    physical_exam_text = read_docx_from_bytes(physical_exam_file.read())
-    st.write("### Selected Physical Exam Content:")
-    st.text_area("Physical Exam Text", physical_exam_text, height=200)
-
 if st.button("Replace"):
     if st.session_state.paragraph_text:
         # Perform replacement

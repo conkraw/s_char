@@ -167,6 +167,12 @@ room_number = st.text_input("Enter Room Number:")
 # Fetch both the diagnoses and physical exam days from GitHub
 physical_exam_days = fetch_physical_exam_days()
 
+# Add the selection input for physical exam day
+if physical_exam_days:
+    selected_exam_day = st.selectbox("Select Physical Examination Day:", physical_exam_days)
+else:
+    selected_exam_day = None
+    
 # Dynamically list available diagnosis documents in the current directory
 available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]
 formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
@@ -177,12 +183,6 @@ sorted_conditions = sorted(formatted_conditions)
 selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
 
 assessment_text = st.text_area("Enter Assessment:")
-
-# Add the selection input for physical exam day
-if physical_exam_days:
-    selected_exam_day = st.selectbox("Select Physical Examination Day:", physical_exam_days)
-else:
-    selected_exam_day = None
 
 if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:

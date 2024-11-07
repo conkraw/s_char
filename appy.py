@@ -4,6 +4,7 @@ from docx.shared import Pt
 import os
 import re
 import requests
+from bs4 import BeautifulSoup
 
 # Function to format diagnosis names
 def format_diagnosis_name(diagnosis):
@@ -28,32 +29,7 @@ def create_word_doc(text):
     doc.save(output_path)
     return output_path
 
-# Function to fetch list of .docx files from GitHub repository with authentication
-def get_github_docs_list(github_repo, folder_path, github_token):
-    # GitHub API URL for listing files in a directory
-    url = f"https://api.github.com/repos/{github_repo}/contents/{folder_path}"
-    headers = {"Authorization": f"token {github_token}"}  # Add the token to the header
-    response = requests.get(url, headers=headers)
-    
-    # Check for rate limit or failed request
-    if response.status_code == 403:  # Forbidden, possibly rate-limited
-        rate_limit = response.headers.get('X-RateLimit-Remaining', 'Unknown')
-        st.error(f"GitHub API Rate Limit Exceeded. Remaining Requests: {rate_limit}")
-        st.error(f"Response: {response.text}")
-        return []
-
-    if response.status_code == 200:
-        files = response.json()
-        # Filter out only the .docx files from the folder
-        doc_files = [file['name'] for file in files if file['name'].endswith('.docx')]
-        return doc_files
-    else:
-        # Print out the error message and status code for debugging
-        st.error(f"Failed to fetch files from GitHub repository. Status Code: {response.status_code}")
-        st.error(f"Response: {response.text}")
-        return []
-
-# Function to read and parse a Word document from a raw GitHub URL
+# Function to fetch the raw content of a Word document directly from GitHub (via raw URL)
 def read_github_doc(github_url):
     response = requests.get(github_url)
     if response.status_code == 200:
@@ -69,8 +45,22 @@ def read_github_doc(github_url):
         return document_text
     else:
         st.error(f"Error downloading the document from GitHub. Status Code: {response.status_code}")
-        st.error(f"Response: {response.text}")
         return None
+
+# Function to get all .docx files from a GitHub directory (using raw HTML scraping)
+def get_github_docs_list(github_repo, folder_path):
+    url = f"https://github.com/{github_repo}/tree/main/{folder_path}"  # GitHub folder URL
+    response = requests.get(url)
+    if response.status_code == 200:
+        # Parse the HTML content to find .docx file links
+        soup = BeautifulSoup(response.content, "html.parser")
+        # Look for links to files that end in .docx
+        links = soup.find_all("a", href=True)
+        doc_files = [link['href'].split('/')[-1] for link in links if link['href'].endswith('.docx')]
+        return doc_files
+    else:
+        st.error(f"Failed to fetch files from GitHub repository: {response.status_code}")
+        return []
 
 # Function to combine diagnosis documents with formatted input text
 def combine_notes(physical_exam_text, assess_text, diagnoses, free_text_diag=None, free_text_plan=None):
@@ -113,7 +103,13 @@ def combine_notes(physical_exam_text, assess_text, diagnoses, free_text_diag=Non
     # Add selected diagnoses (from the list)
     for i, diagnosis in enumerate(diagnoses, start=1):
         diagnosis_key = diagnosis.lower().replace(' ', '_') + '.docx'
-        if os.path.exists(diagnosis_key):
+        
+        # Create the raw URL for the diagnosis document from your GitHub repo
+        diagnosis_url = f"https://raw.githubusercontent.com/conkraw/s_char/main/diagnoses/{diagnosis_key}"
+        
+        # Download and add diagnosis content if it exists
+        diagnosis_text = read_github_doc(diagnosis_url)
+        if diagnosis_text:
             diagnosis_paragraph = doc.add_paragraph()
             diagnosis_run = diagnosis_paragraph.add_run(f"{i}). {diagnosis}")
             diagnosis_run.font.size = Pt(9)
@@ -121,16 +117,16 @@ def combine_notes(physical_exam_text, assess_text, diagnoses, free_text_diag=Non
             diagnosis_paragraph.paragraph_format.space_before = Pt(0)
             diagnosis_paragraph.paragraph_format.space_after = Pt(0) 
             
-            diagnosis_doc = Document(diagnosis_key)
-            for para in diagnosis_doc.paragraphs:
-                new_paragraph = doc.add_paragraph(para.text)
+            # Add diagnosis text
+            for para in diagnosis_text.split("\n"):
+                new_paragraph = doc.add_paragraph(para)
                 new_paragraph.paragraph_format.space_before = Pt(0)
                 new_paragraph.paragraph_format.space_after = Pt(0)  # No space after diagnosis content
                 
                 for run in new_paragraph.runs:
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
-            
+
     # Append free-text diagnosis and plan if provided
     if free_text_diag and free_text_plan:
         doc.add_paragraph()  # Add a blank line
@@ -154,14 +150,8 @@ room_number = st.text_input("Enter Room Number:")
 github_repo = "conkraw/s_char"  # Replace with your actual GitHub repository
 folder_path = "physicalexam"  # Folder in your GitHub repo containing the exam documents
 
-# Streamlit input for GitHub token
-github_token = st.text_input("Enter your GitHub Personal Access Token:")
-
-# Fetch the list of available documents from GitHub using the token
-if github_token:
-    available_exam_docs = get_github_docs_list(github_repo, folder_path, github_token)
-else:
-    st.warning("Please provide your GitHub token to fetch documents.")
+# Fetch the list of available documents from GitHub
+available_exam_docs = get_github_docs_list(github_repo, folder_path)
 
 # Allow user to select a physical exam document from the available list
 if available_exam_docs:
@@ -198,4 +188,6 @@ if st.button("Submit New Note"):
             st.download_button("Download Combined Note", f, file_name=file_name)
     else:
         st.error("Please fill out all fields.")
+
+
 

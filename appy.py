@@ -80,7 +80,18 @@ def create_word_doc(text):
 # Function to combine diagnosis documents with formatted input text
 def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=None, physical_exam_day=None):
     doc = Document()
-    
+
+    # Add the introductory statement at the top (italicized, Arial, font size 9)
+    intro_paragraph = doc.add_paragraph()
+    intro_run = intro_paragraph.add_run(
+        "I personally examined the patient separately and discussed the case with the resident/physician assistant and with any services involved in a multidisciplinary fashion. I agree with the resident/physician's assistant documentation with any exceptions noted below:"
+    )
+    intro_run.italic = True
+    intro_run.font.name = 'Arial'
+    intro_run.font.size = Pt(9)
+    intro_paragraph.paragraph_format.space_after = Pt(0)
+    intro_paragraph.paragraph_format.space_before = Pt(0)
+
     # Add Objective section if a physical exam day is selected
     if physical_exam_day:
         objective_paragraph = doc.add_paragraph()
@@ -110,13 +121,13 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
             
             # Add a small amount of space after the physical exam content (1 single line)
             last_paragraph = doc.add_paragraph()  # Add an empty paragraph
-            last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
+            last_paragraph.paragraph_format.space_after = Pt(6)  # Set space after to a small value (6 pt)
             
             # Ensure the empty paragraph is also in Arial, size 9 (to maintain consistent formatting)
             for run in last_paragraph.runs:
                 run.font.name = 'Arial'
                 run.font.size = Pt(9)
-    
+
     # Add Assessment section
     assessment_paragraph = doc.add_paragraph()
     assessment_run = assessment_paragraph.add_run("ASSESSMENT:")
@@ -125,7 +136,7 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
     assessment_run.font.name = 'Arial'
     assessment_run.font.size = Pt(9)
     assessment_paragraph.paragraph_format.space_after = Pt(0)
-    #assessment_paragraph.paragraph_format.space_before = Pt(0)
+    assessment_paragraph.paragraph_format.space_before = Pt(0)
     
     assessment_content = doc.add_paragraph(assess_text)
     for run in assessment_content.runs:
@@ -192,15 +203,15 @@ formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
 # Sort the formatted conditions alphabetically
 sorted_conditions = sorted(formatted_conditions)
 
-selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
-
-assessment_text = st.text_area("Enter Assessment:")
-
 # Add the selection input for physical exam day
 if physical_exam_days:
     selected_exam_day = st.selectbox("Select Physical Examination Day:", physical_exam_days)
 else:
     selected_exam_day = None
+    
+selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
+
+assessment_text = st.text_area("Enter Assessment:")
 
 if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:
@@ -210,6 +221,5 @@ if st.button("Submit New Note"):
             st.download_button("Download Combined Note", f, file_name=file_name)
     else:
         st.error("Please fill out all fields.")
-
 
 

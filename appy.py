@@ -182,10 +182,6 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
 
-            for run in last_paragraph.runs:
-                run.font.name = 'Arial'
-                run.font.size = Pt(9)
-
     # Add Assessment section
     assessment_paragraph = doc.add_paragraph()
     assessment_run = assessment_paragraph.add_run("ASSESSMENT:")

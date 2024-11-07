@@ -186,9 +186,6 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
 
-            last_paragraph = doc.add_paragraph()  # Add an empty paragraph
-            last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
-
             for run in last_paragraph.runs:
                 run.font.name = 'Arial'
                 run.font.size = Pt(9)

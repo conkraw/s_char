@@ -13,6 +13,10 @@ def format_diagnosis_name(diagnosis):
     return formatted_name
 
 # Function to create a Word document with specific font settings and single spacing
+from docx import Document
+from docx.shared import Pt
+
+# Function to create a Word document with specific font settings and single spacing
 def create_word_doc(text):
     doc = Document()
 
@@ -24,11 +28,12 @@ def create_word_doc(text):
     objective_run.font.name = 'Arial'
     objective_run.font.size = Pt(9)
 
-    objective_paragraph.style = None  # Ensure no styles are applied to the paragraph
+    # Ensure no styles are applied to the "OBJECTIVE:" paragraph
+    objective_paragraph.style = None  # Remove any default styles (e.g., Heading 1)
     objective_paragraph.alignment = 0  # Align left (optional)
     objective_paragraph.paragraph_format.space_after = Pt(0)
     objective_paragraph.paragraph_format.space_before = Pt(0)
-    objective_paragraph.paragraph_format.line_spacing = Pt(12)  #
+    objective_paragraph.paragraph_format.line_spacing = Pt(12)  # Single line spacing
 
     # Now, add the rest of the content after "OBJECTIVE:"
     for line in text.split('\n'):
@@ -40,11 +45,13 @@ def create_word_doc(text):
         # Set paragraph spacing to ensure single line spacing
         p.paragraph_format.space_after = Pt(0)
         p.paragraph_format.space_before = Pt(0)
+        p.paragraph_format.line_spacing = Pt(12)  # Apply single line spacing to all paragraphs
 
     # Save the document
     output_path = "updated_note.docx"
     doc.save(output_path)
     return output_path
+
 
 # Function to fetch the raw content of a Word document directly from GitHub (via raw URL)
 def read_github_doc(github_url):

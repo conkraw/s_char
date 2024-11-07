@@ -6,6 +6,22 @@ from docx.shared import Pt
 def create_word_doc(text):
     doc = Document()
     
+    # The specific phrase to add at the top of the document
+    intro_text = (
+        "I personally examined the patient separately and discussed the case with the resident/physician assistant "
+        "and with any services involved in a multidisciplinary fashion. I agree with the resident/physician's assistant "
+        "documentation with any exceptions noted below:"
+    )
+    
+    # Add the introductory text as a paragraph, italicized
+    intro_paragraph = doc.add_paragraph()
+    intro_run = intro_paragraph.add_run(intro_text)
+    intro_run.italic = True  # Set the intro text to be italicized
+
+    # Add a line break after the introductory statement
+    doc.add_paragraph()  # This adds a blank line after the intro text
+    
+    # Process the rest of the text passed into the function
     sections = text.split('\n')
     for section in sections:
         p = doc.add_paragraph()

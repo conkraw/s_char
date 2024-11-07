@@ -253,17 +253,25 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     # Append Critical Care Time if provided
     if critical_care_time:
         plan_paragraph = doc.add_paragraph()
-        plan_run = plan_paragraph.add_run(f"Critical Care Time: {critical_care_time}")
+    
+        # Add the bolded "Critical Care Time: " part
+        plan_run = plan_paragraph.add_run("Critical Care Time: ")
         plan_run.bold = True
         plan_run.font.name = 'Arial'
         plan_run.font.size = Pt(9)
+    
+        # Add the non-bolded critical care time value
+        plan_run = plan_paragraph.add_run(f"{critical_care_time}")
+        plan_run.bold = False  # Remove bold formatting
+        plan_run.font.name = 'Arial'
+        plan_run.font.size = Pt(9)
+    
         plan_paragraph.paragraph_format.space_before = Pt(6)
         plan_paragraph.paragraph_format.space_after = Pt(6)
-
+    
     output_path = "combined_note.docx"
     doc.save(output_path)
     return output_path
-
 
 # Title of the app
 st.title("Note Management App")

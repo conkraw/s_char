@@ -344,17 +344,12 @@ formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
 
 sorted_conditions = sorted(formatted_conditions)
 
-# Add the selection input for ROS file
-if ros_files:
-    selected_ros_file = st.selectbox("Select Review of Systems File:", ros_files)
-else:
-    selected_ros_file = None
+# Dropdowns for selecting ROS and Physical Exam files
+ros_selection = st.selectbox("Select ROS file:", list(ros_files.keys()))
 
-# Add the selection input for physical exam day
-if physical_exam_days:
-    selected_exam_day = st.selectbox("Select Physical Examination Day:", physical_exam_days)
-else:
-    selected_exam_day = None
+sorted_physical_exam_options = sorted(physical_exam_files.keys(), key=lambda x: (x.split()[0], int(x.split()[2])))
+
+physical_exam_selection = st.selectbox("Select Physical Exam file:", list(physical_exam_files.keys()))
 
 ros_url = ros_files[ros_selection]
 physical_exam_url = physical_exam_files[physical_exam_selection]

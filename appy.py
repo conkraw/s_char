@@ -111,9 +111,9 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     overnight_content_run.font.size = Pt(9)
     overnight_paragraph.paragraph_format.space_after = Pt(6)
     overnight_paragraph.paragraph_format.space_before = Pt(6)
-
+    
     # Add "SUBJECTIVE" header and ROS content
-    if ros_file != "None.docx":
+    if ros_file and ros_file != "None.docx":
         ros_paragraph = doc.add_paragraph()
         
         # Add SUBJECTIVE heading (bold, underline)
@@ -122,19 +122,21 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         ros_run.underline = True
         ros_run.font.name = 'Arial'
         ros_run.font.size = Pt(9)
-
+    
         ros_paragraph.paragraph_format.space_after = Pt(0)
         ros_paragraph.paragraph_format.space_before = Pt(0)
         
         # Fetch the content of the selected ROS file using read_docx_from_url
         ros_content = read_docx_from_url(ros_file)
-
-        # Add the ROS content to the document
+        
+        # Ensure the ROS content is being fetched correctly
         if ros_content:
-            ros_paragraph = doc.add_paragraph(ros_content)
-            ros_paragraph.font.name = 'Arial'
-            ros_paragraph.font.size = Pt(9)
-
+            # Add the ROS content to the document as paragraphs
+            for line in ros_content.split("\n"):
+                ros_paragraph = doc.add_paragraph(line)
+                ros_paragraph.font.name = 'Arial'
+                ros_paragraph.font.size = Pt(9)
+    
     # Add Objective section if a physical exam day is selected
     if physical_exam_day:
         objective_paragraph = doc.add_paragraph()
@@ -145,15 +147,18 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         objective_run.font.size = Pt(9)
         objective_paragraph.paragraph_format.space_after = Pt(0)
         objective_paragraph.paragraph_format.space_before = Pt(0)
-
+    
         # Fetch the content of the selected physical exam day using read_docx_from_url
         physical_exam_content = read_docx_from_url(physical_exam_day)
-
-        # Add the fetched content under the OBJECTIVE section
+    
+        # Ensure the physical exam content is being fetched correctly
         if physical_exam_content:
-            objective_paragraph = doc.add_paragraph(physical_exam_content)
-            objective_paragraph.font.name = 'Arial'
-            objective_paragraph.font.size = Pt(9)
+            # Add the fetched content under the OBJECTIVE section
+            for line in physical_exam_content.split("\n"):
+                objective_paragraph = doc.add_paragraph(line)
+                objective_paragraph.font.name = 'Arial'
+                objective_paragraph.font.size = Pt(9)
+
 
     # Add the Assessment section
     assessment_paragraph = doc.add_paragraph()
@@ -255,10 +260,6 @@ st.header("Create a New Note")
 
 # Input for room number
 room_number = st.text_input("Enter Room Number:")
-
-# Fetch both the diagnoses and physical exam days from GitHub
-#physical_exam_days = fetch_files_from_github('physicalexam')
-#ros_files = fetch_files_from_github('ros')
 
 ros_files = {
     "None": "https://raw.githubusercontent.com/conkraw/s_char/main/ros/None.docx",

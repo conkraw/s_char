@@ -92,6 +92,9 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
     intro_paragraph.paragraph_format.space_after = Pt(0)
     intro_paragraph.paragraph_format.space_before = Pt(0)
 
+    last_paragraph = doc.add_paragraph()  # Add an empty paragraph
+    last_paragraph.paragraph_format.space_after = Pt(6)  # Set space after to a small value (6 pt)
+
     # Add Objective section if a physical exam day is selected
     if physical_exam_day:
         objective_paragraph = doc.add_paragraph()

@@ -4,7 +4,6 @@ from docx.shared import Pt
 import os
 import re
 import requests
-from io import BytesIO
 
 # Function to format diagnosis names
 def format_diagnosis_name(diagnosis):
@@ -13,32 +12,34 @@ def format_diagnosis_name(diagnosis):
     formatted_name = formatted_name.title()
     return formatted_name
 
-# Function to fetch the physical exam day documents from GitHub (handling .docx files)
+# Function to create a Word document with specific font settings and single spacing
+def create_word_doc(text):
+    doc = Document()
+    
+    for line in text.split('\n'):
+        p = doc.add_paragraph()
+        run = p.add_run(line)
+        run.font.name = 'Arial'
+        run.font.size = Pt(9)
+        p.paragraph_format.space_after = Pt(0)
+        p.paragraph_format.space_before = Pt(0)
+
+    output_path = "updated_note.docx"
+    doc.save(output_path)
+    return output_path
+
+# Function to fetch the physical exam day documents from GitHub
 def fetch_physical_exam_docs():
     # GitHub raw file URL for the physical exam documents
     url = 'https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam'
+    # Get a list of files in the repository
     response = requests.get(url)
     if response.status_code == 200:
-        files = response.text.splitlines()  # Assuming the files are listed as plain text in the GitHub repo
+        files = response.text.splitlines()
         return files  # List of file names
     else:
-        st.error(f"Error fetching files from GitHub. Status code: {response.status_code}")
+        st.error("Error fetching files from GitHub.")
         return []
-
-# Function to fetch and process a .docx file from GitHub
-def fetch_physical_exam_text(exam_file):
-    url = f'https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/{exam_file}'
-    response = requests.get(url)
-
-    if response.status_code == 200:
-        # Use BytesIO to load the .docx content into memory
-        docx_file = BytesIO(response.content)
-        doc = Document(docx_file)
-        exam_text = "\n".join([para.text for para in doc.paragraphs])
-        return exam_text
-    else:
-        st.error(f"Error fetching the selected physical exam document: {exam_file}")
-        return ""
 
 # Function to combine diagnosis documents with formatted input text
 def combine_notes(physical_exam_text, assess_text, diagnoses, free_text_diag=None, free_text_plan=None):
@@ -125,6 +126,18 @@ st.header("Create a New Note")
 # Input for room number
 room_number = st.text_input("Enter Room Number:")
 
+# Dynamically list available diagnosis documents in the current directory
+available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]
+formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
+
+# Sort the formatted conditions alphabetically
+sorted_conditions = sorted(formatted_conditions)
+
+# Create a mapping for formatted names to original filenames
+diagnosis_mapping = {format_diagnosis_name(doc): doc for doc in available_docs}
+
+selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
+
 # Fetch available physical exam documents from GitHub
 exam_docs = fetch_physical_exam_docs()
 
@@ -135,16 +148,18 @@ selected_exam = st.selectbox("Select Physical Exam Day:", exam_docs)
 assessment_text = st.text_area("Enter Assessment:")
 
 if st.button("Submit New Note"):
-    if selected_exam and assessment_text and room_number:
-        # Fetch the physical exam content from GitHub
-        physical_exam_text = fetch_physical_exam_text(selected_exam)
-        if physical_exam_text:
-            combined_file = combine_notes(physical_exam_text, assessment_text, [])
+    if selected_conditions and assessment_text and room_number and selected_exam:
+        # Fetch the physical exam content from GitHub (assuming raw text files)
+        exam_url = f'https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/{selected_exam}'
+        exam_response = requests.get(exam_url)
+        if exam_response.status_code == 200:
+            physical_exam_text = exam_response.text
+            combined_file = combine_notes(physical_exam_text, assessment_text, selected_conditions)
             file_name = f"{room_number}.docx"
             with open(combined_file, "rb") as f:
                 st.download_button("Download Combined Note", f, file_name=file_name)
         else:
-            st.error("Error fetching the physical exam document.")
+            st.error("Error fetching the selected physical exam document.")
     else:
         st.error("Please fill out all fields.")
 

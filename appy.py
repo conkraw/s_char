@@ -98,11 +98,11 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
     # Add Review of Systems section first (if ROS file is selected)
     if ros_file:
         ros_paragraph = doc.add_paragraph()
-        ros_run = ros_paragraph.add_run("REVIEW OF SYSTEMS:")
-        ros_run.bold = True
-        ros_run.underline = True
-        ros_run.font.name = 'Arial'
-        ros_run.font.size = Pt(9)
+        #ros_run = ros_paragraph.add_run("REVIEW OF SYSTEMS:")
+        #ros_run.bold = True
+        #ros_run.underline = True
+        #ros_run.font.name = 'Arial'
+        #ros_run.font.size = Pt(9)
         ros_paragraph.paragraph_format.space_after = Pt(0)
         ros_paragraph.paragraph_format.space_before = Pt(0)
         

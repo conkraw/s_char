@@ -356,6 +356,12 @@ if physical_exam_days:
 else:
     selected_exam_day = None
 
+ros_url = ros_files[ros_selection]
+physical_exam_url = physical_exam_files[physical_exam_selection]
+
+ros_text = read_docx_from_url(ros_url)  # Fetch the content of ROS file
+physical_exam_text = read_docx_from_url(physical_exam_url)  # Fetch the content of Physical Exam file
+
 # Select diagnoses
 selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
 

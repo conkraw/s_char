@@ -34,11 +34,8 @@ def create_word_doc(text, ros_text, physical_exam_text):
     # Add ROS if selected
     if ros_text:
         ros_paragraph = doc.add_paragraph()
-        ros_run = ros_paragraph.add_run("SUBJECTIVE:\n" + ros_text)
         ros_run.font.name = 'Arial'
         ros_run.font.size = Pt(9)
-        ros_run.bold = True
-        ros_run.underline = True
 
     # Add Physical Exam (always required)
     physical_exam_paragraph = doc.add_paragraph()

@@ -300,7 +300,7 @@ ros_files = {
     "ROS_RN": "https://raw.githubusercontent.com/conkraw/s_char/main/ros/ros_rn.docx"
 }
 
-physical_exam_days = {
+physical_exam_files = {
     "Adolescent Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day0.docx",
     "Infant Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day0.docx",
     "Child Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day0.docx",

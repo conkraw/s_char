@@ -13,10 +13,12 @@ def create_word_doc(text):
         "documentation with any exceptions noted below:"
     )
     
-    # Add the introductory text as a paragraph, italicized
+    # Add the introductory text as a paragraph, italicized, with Arial font and size 9
     intro_paragraph = doc.add_paragraph()
     intro_run = intro_paragraph.add_run(intro_text)
     intro_run.italic = True  # Set the intro text to be italicized
+    intro_run.font.name = 'Arial'  # Set the font to Arial
+    intro_run.font.size = Pt(9)   # Set the font size to 9
 
     # Add a line break after the introductory statement
     doc.add_paragraph()  # This adds a blank line after the intro text
@@ -27,9 +29,9 @@ def create_word_doc(text):
         p = doc.add_paragraph()
         run = p.add_run(section)
         
-        # Set font properties
+        # Set font properties for the rest of the document
         run.font.name = 'Arial'
-        run.font.size = Pt(10)
+        run.font.size = Pt(9)
 
         # Check for "ASSESSMENT:" and "PLAN:" to apply bold and underline
         if section.startswith("ASSESSMENT:"):

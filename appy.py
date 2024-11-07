@@ -192,20 +192,21 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         run.font.name = 'Arial'
         run.font.size = Pt(9)
 
-    # Add the "Why Critical Care" dropdown selection after assessment
-    critical_care_paragraph = doc.add_paragraph()
-    critical_care_run = critical_care_paragraph.add_run("CLINICAL INDICATIONS FOR CRITICAL CARE SERVICES:")
-    critical_care_run.bold = True
-    critical_care_run.underline = True
-    critical_care_run.font.name = 'Arial'
-    critical_care_run.font.size = Pt(9)
-    critical_care_paragraph.paragraph_format.space_after = Pt(0)
-    critical_care_paragraph.paragraph_format.space_before = Pt(0)
-    
-    critical_care_content = doc.add_paragraph(critical_care_reason)
-    for run in critical_care_content.runs:
-        run.font.name = 'Arial'
-        run.font.size = Pt(9)
+    # Add the "Why Critical Care" dropdown selection after assessment only if it's not empty
+    if critical_care_reason != "":
+        critical_care_paragraph = doc.add_paragraph()
+        critical_care_run = critical_care_paragraph.add_run("CLINICAL INDICATIONS FOR CRITICAL CARE SERVICES:")
+        critical_care_run.bold = True
+        critical_care_run.underline = True
+        critical_care_run.font.name = 'Arial'
+        critical_care_run.font.size = Pt(9)
+        critical_care_paragraph.paragraph_format.space_after = Pt(0)
+        critical_care_paragraph.paragraph_format.space_before = Pt(0)
+        
+        critical_care_content = doc.add_paragraph(critical_care_reason)
+        for run in critical_care_content.runs:
+            run.font.name = 'Arial'
+            run.font.size = Pt(9)
 
     # Plan section
     plan_paragraph = doc.add_paragraph()
@@ -255,6 +256,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     output_path = "combined_note.docx"
     doc.save(output_path)
     return output_path
+
 
 
 # Title of the app

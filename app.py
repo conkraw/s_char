@@ -32,6 +32,21 @@ def create_word_doc(text, ros_text, physical_exam_text):
     intro_run.font.name = 'Arial'  # Set the font to Arial
     intro_run.font.size = Pt(9)   # Set the font size to 9
     
+    # Add the "OVERNIGHT EVENTS:" header and its content
+    overnight_paragraph = doc.add_paragraph()
+    
+    # "OVERNIGHT EVENTS:" header
+    overnight_header_run = overnight_paragraph.add_run("OVERNIGHT EVENTS: ")
+    overnight_header_run.bold = True
+    overnight_header_run.underline = True
+    overnight_header_run.font.name = 'Arial'
+    overnight_header_run.font.size = Pt(9)
+    
+    # "No acute events were noted overnight" content (no bold/underline)
+    overnight_content_run = overnight_paragraph.add_run("No acute events were noted overnight")
+    overnight_content_run.font.name = 'Arial'
+    overnight_content_run.font.size = Pt(9)
+    
     # Add ROS if selected
     if ros_text:
         ros_paragraph = doc.add_paragraph()
@@ -47,7 +62,7 @@ def create_word_doc(text, ros_text, physical_exam_text):
         ros_content_run = ros_paragraph.add_run("\n" + ros_text)
         ros_content_run.font.name = 'Arial'
         ros_content_run.font.size = Pt(9)
-
+        
     # Now we handle the "OBJECTIVE:" section and the rest of the physical exam content
     physical_exam_lines = physical_exam_text.split("\n")
     

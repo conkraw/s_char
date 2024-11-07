@@ -92,8 +92,8 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     intro_paragraph.paragraph_format.space_after = Pt(0)
     intro_paragraph.paragraph_format.space_before = Pt(0)
 
-    # Add Review of Systems section first (if ROS file is selected)
-    if ros_file:
+    # Add Review of Systems section if a ROS file is selected (not empty)
+    if ros_file != "":
         ros_paragraph = doc.add_paragraph()
         ros_paragraph.paragraph_format.space_after = Pt(0)
         ros_paragraph.paragraph_format.space_before = Pt(0)
@@ -256,8 +256,6 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     output_path = "combined_note.docx"
     doc.save(output_path)
     return output_path
-
-
 
 # Title of the app
 st.title("Note Management App")

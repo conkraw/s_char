@@ -88,7 +88,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     intro_run.italic = True
     intro_run.font.name = 'Arial'
     intro_run.font.size = Pt(9)
-    intro_paragraph.paragraph_format.space_after = Pt(0)
+    intro_paragraph.paragraph_format.space_after = Pt(6)
     intro_paragraph.paragraph_format.space_before = Pt(0)
 
     # Add "OVERNIGHT EVENTS:" section
@@ -101,8 +101,8 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     overnight_content_run = overnight_paragraph.add_run("No acute events were noted overnight.")
     overnight_content_run.font.name = 'Arial'
     overnight_content_run.font.size = Pt(9)
-    overnight_paragraph.paragraph_format.space_after = Pt(0)
-    overnight_paragraph.paragraph_format.space_before = Pt(0)
+    overnight_paragraph.paragraph_format.space_after = Pt(6)
+    overnight_paragraph.paragraph_format.space_before = Pt(6)
 
     # Add "SUBJECTIVE" header and ROS content
     if ros_file != "None.docx":
@@ -271,6 +271,8 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         plan_run.bold = True
         plan_run.font.name = 'Arial'
         plan_run.font.size = Pt(9)
+        plan_paragraph.paragraph_format.space_before = Pt(6)
+        plan_paragraph.paragraph_format.space_after = Pt(6)
 
     output_path = "combined_note.docx"
     doc.save(output_path)

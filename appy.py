@@ -15,19 +15,21 @@ def format_diagnosis_name(diagnosis):
 # Function to create a Word document with specific font settings and single spacing
 def create_word_doc(text):
     doc = Document()
+
+    # First, add the "OBJECTIVE:" as the first section
+    objective_paragraph = doc.add_paragraph()
+    objective_run = objective_paragraph.add_run("OBJECTIVE:")
+    objective_run.bold = True
+    objective_run.underline = True
+    objective_run.font.name = 'Arial'
+    objective_run.font.size = Pt(9)
     
-    for line in text.split('\n'):
-        p = doc.add_paragraph()
-        
-        objective_run = p.add_run("OBJECTIVE:")
-        objective_run.bold = True
-        objective_run.underline = True
-        objective_run.font.name = 'Arial'
-        objective_run.font.size = Pt(9)
+    # Add a space after the title to separate it from the content
+    objective_paragraph.paragraph_format.space_after = Pt(0)
+    objective_paragraph.paragraph_format.space_before = Pt(0)
 
-        p.paragraph_format.space_after = Pt(0)
-        p.paragraph_format.space_before = Pt(0)
 
+    # Save the document
     output_path = "updated_note.docx"
     doc.save(output_path)
     return output_path

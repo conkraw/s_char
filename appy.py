@@ -111,6 +111,11 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
             # Add a small amount of space after the physical exam content (1 single line)
             last_paragraph = doc.add_paragraph()  # Add an empty paragraph
             last_paragraph.paragraph_format.space_after = Pt(6)  # Set space after to a small value (6 pt)
+            
+            # Ensure the empty paragraph is also in Arial, size 9 (to maintain consistent formatting)
+            for run in last_paragraph.runs:
+                run.font.name = 'Arial'
+                run.font.size = Pt(9)
     
     # Add Assessment section
     assessment_paragraph = doc.add_paragraph()
@@ -205,5 +210,6 @@ if st.button("Submit New Note"):
             st.download_button("Download Combined Note", f, file_name=file_name)
     else:
         st.error("Please fill out all fields.")
+
 
 

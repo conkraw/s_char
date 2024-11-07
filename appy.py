@@ -24,11 +24,11 @@ def create_word_doc(text):
     objective_run.font.name = 'Arial'
     objective_run.font.size = Pt(9)
 
-    objective_paragraph.style = 'Normal'
-    
-    # Add a space after the title to separate it from the content
+    objective_paragraph.style = None  # Ensure no styles are applied to the paragraph
+    objective_paragraph.alignment = 0  # Align left (optional)
     objective_paragraph.paragraph_format.space_after = Pt(0)
     objective_paragraph.paragraph_format.space_before = Pt(0)
+    objective_paragraph.paragraph_format.line_spacing = Pt(12)  #
 
     # Now, add the rest of the content after "OBJECTIVE:"
     for line in text.split('\n'):

@@ -62,6 +62,10 @@ def fetch_file_content(folder_name, file_name, fetch_diagnosis=True):
         return None
 
 def read_docx_from_url(url):
+    # Ensure the URL starts with https:// or http://
+    if not url.startswith(('http://', 'https://')):
+        url = 'https://' + url  # Default to https if not present
+
     response = requests.get(url)
     doc = Document(BytesIO(response.content))
     content = []

@@ -347,8 +347,6 @@ sorted_conditions = sorted(formatted_conditions)
 # Dropdowns for selecting ROS and Physical Exam files
 ros_selection = st.selectbox("Select ROS file:", list(ros_files.keys()))
 
-sorted_physical_exam_options = sorted(physical_exam_files.keys(), key=lambda x: (x.split()[0], int(x.split()[2])))
-
 physical_exam_selection = st.selectbox("Select Physical Exam file:", list(physical_exam_files.keys()))
 
 ros_url = ros_files[ros_selection]
@@ -399,8 +397,8 @@ if st.button("Submit New Note"):
             assessment_text,
             selected_critical_care,
             selected_conditions,
-            physical_exam_day="test", 
-            ros_file="test",
+            physical_exam_day=physical_exam_text, 
+            ros_file=ros_text,
             critical_care_time=critical_care_time
         )
         file_name = f"{room_number}.docx"

@@ -265,67 +265,12 @@ st.header("Create a New Note")
 # Input for room number
 room_number = st.text_input("Enter Room Number:")
 
-ros_files = {
-    "None": "https://raw.githubusercontent.com/conkraw/s_char/main/ros/None.docx",
-    "ROS_PARENT": "https://raw.githubusercontent.com/conkraw/s_char/main/ros/ros_parent.docx",
-    "ROS_RN": "https://raw.githubusercontent.com/conkraw/s_char/main/ros/ros_rn.docx"
-}
-
-physical_exam_days = {
-    "Adolescent Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day0.docx",
-    "Infant Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day0.docx",
-    "Child Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day0.docx",
-    "Chronic Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day0.docx",
-    
-    "Adolescent Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day1.docx",
-    "Infant Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day1.docx",
-    "Child Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day1.docx",
-    "Chronic Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day1.docx",
-    
-    "Adolescent Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day2.docx",
-    "Infant Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day2.docx",
-    "Child Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day2.docx",
-    "Chronic Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day2.docx",
-    
-    "Adolescent Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day3.docx",
-    "Infant Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day3.docx",
-    "Child Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day3.docx",
-    "Chronic Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day3.docx",
-    
-    "Adolescent Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day4.docx",
-    "Infant Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day4.docx",
-    "Child Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day4.docx",
-    "Chronic Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day4.docx",
-    
-    "Adolescent Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day5.docx",
-    "Infant Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day5.docx",
-    "Child Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day5.docx",
-    "Chronic Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day5.docx",
-    
-    "Adolescent Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day6.docx",
-    "Infant Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day6.docx",
-    "Child Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day6.docx",
-    "Chronic Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day6.docx",
-}
-
 
 # Dynamically list available diagnosis documents in the current directory
 available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]
 formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
 
 sorted_conditions = sorted(formatted_conditions)
-
-# Add the selection input for ROS file
-if ros_files:
-    selected_ros_file = st.selectbox("Select Review of Systems File:", ros_files)
-else:
-    selected_ros_file = None
-
-# Add the selection input for physical exam day
-if physical_exam_days:
-    selected_exam_day = st.selectbox("Select Physical Examination Day:", physical_exam_days)
-else:
-    selected_exam_day = None
 
 # Select diagnoses
 selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)

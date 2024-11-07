@@ -314,8 +314,6 @@ if st.button("Submit New Note"):
             assessment_text,
             selected_critical_care,
             selected_conditions,
-            physical_exam_day=selected_exam_day,
-            ros_file=selected_ros_file,
             critical_care_time=critical_care_time
         )
         file_name = f"{room_number}.docx"

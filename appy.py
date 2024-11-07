@@ -37,6 +37,30 @@ def fetch_physical_exam_days():
     
     return physical_exam_days
 
+# Function to download and extract content from a physical exam day document
+def fetch_physical_exam_content(exam_file_name):
+    url = f"https://raw.githubusercontent.com/conkraw/s_char/master/physicalexam/{exam_file_name}"
+    try:
+        # Download the physical exam document as raw content
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            # Save the content as a .docx file locally
+            with open(exam_file_name, "wb") as f:
+                f.write(response.content)
+            
+            # Now read the content from the local file
+            exam_doc = Document(exam_file_name)
+            content = "\n".join([para.text for para in exam_doc.paragraphs])
+            os.remove(exam_file_name)  # Remove the local file after reading content
+            return content
+        else:
+            st.error(f"Failed to fetch physical exam content: Status code {response.status_code}")
+            return ""
+    except requests.exceptions.RequestException as e:
+        st.error(f"An error occurred while fetching physical exam content: {e}")
+        return ""
+
 # Function to create a Word document with specific font settings and single spacing
 def create_word_doc(text):
     doc = Document()
@@ -68,8 +92,12 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
         objective_paragraph.paragraph_format.space_after = Pt(0)
         objective_paragraph.paragraph_format.space_before = Pt(0)
         
-        # Add the selected physical exam day below "OBJECTIVE"
-        doc.add_paragraph(f"Physical Exam Day: {physical_exam_day}")
+        # Fetch the content of the selected physical exam day
+        physical_exam_content = fetch_physical_exam_content(physical_exam_day)
+        
+        # Add the fetched content under the OBJECTIVE section
+        if physical_exam_content:
+            doc.add_paragraph(physical_exam_content)
     
     # Add Assessment section
     assessment_paragraph = doc.add_paragraph()

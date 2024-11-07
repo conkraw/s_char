@@ -21,7 +21,7 @@ def create_word_doc(text):
         p = doc.add_paragraph()
 
         # Check if the word "OBJECTIVE:" is in the line
-        if "OBJECTIVE:" in line:
+        if "OBJECTIVE: " in line:
             # First, add the bold and underlined "OBJECTIVE:"
             objective_run = p.add_run("OBJECTIVE:")
             objective_run.bold = True
@@ -77,7 +77,7 @@ def get_github_docs_list(github_repo, folder_path):
         doc_files = [file['name'] for file in files if file['name'].endswith('.docx')]
         return doc_files
     else:
-        st.error(f"Failed to fetch files from GitHub repository. Status Code: {response.status_code}")
+        #st.error(f"Failed to fetch files from GitHub repository. Status Code: {response.status_code}")
         return []
 
 # Function to combine diagnosis documents with formatted input text

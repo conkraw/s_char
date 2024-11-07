@@ -337,17 +337,17 @@ formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
 # Sort the formatted conditions alphabetically
 sorted_conditions = sorted(formatted_conditions)
 
-# Add the selection input for physical exam day
-if physical_exam_days:
-    selected_exam_day = st.selectbox("Select Physical Examination Day:", physical_exam_days)
-else:
-    selected_exam_day = None
-
 # Add the selection input for ROS file
 if ros_files:
     selected_ros_file = st.selectbox("Select Review of Systems File:", ros_files)
 else:
     selected_ros_file = None
+
+# Add the selection input for physical exam day
+if physical_exam_days:
+    selected_exam_day = st.selectbox("Select Physical Examination Day:", physical_exam_days)
+else:
+    selected_exam_day = None
 
 # Select diagnoses
 selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)

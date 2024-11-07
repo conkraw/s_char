@@ -60,16 +60,15 @@ def create_word_doc(text, ros_text, physical_exam_text):
     # Add ROS if selected
     if ros_text:
         ros_paragraph = doc.add_paragraph()
-        ros_run = ros_paragraph.add_run("Review of Systems:\n" + ros_text)
         ros_run.font.name = 'Arial'
-        ros_run.font.size = Pt(10)
+        ros_run.font.size = Pt(9)
         doc.add_paragraph()  # Add a blank line after ROS
 
     # Add Physical Exam (always required)
     physical_exam_paragraph = doc.add_paragraph()
-    physical_exam_run = physical_exam_paragraph.add_run("Physical Exam:\n" + physical_exam_text)
+    physical_exam_run = physical_exam_paragraph.add_run("OBJECTIVE:\n" + physical_exam_text)
     physical_exam_run.font.name = 'Arial'
-    physical_exam_run.font.size = Pt(10)
+    physical_exam_run.font.size = Pt(9)
     doc.add_paragraph()  # Add a blank line after Physical Exam
 
     # Process the rest of the text passed into the function
@@ -87,6 +86,15 @@ def create_word_doc(text, ros_text, physical_exam_text):
             run.bold = True
             run.underline = True
         elif section.startswith("PLAN:"):
+            run.bold = True
+            run.underline = True
+        elif section.startswith("OVERNIGHT EVENTS:"):
+            run.bold = True
+            run.underline = True
+        elif section.startswith("SUBJECTIVE:"):
+            run.bold = True
+            run.underline = True
+        elif section.startswith("OBJECTIVE:"):
             run.bold = True
             run.underline = True
 

@@ -115,7 +115,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         ros_run.font.name = 'Arial'
         ros_run.font.size = Pt(9)
 
-        ros_paragraph.paragraph_format.space_after = Pt(0)
+        ros_paragraph.paragraph_format.space_after = Pt(6)
         ros_paragraph.paragraph_format.space_before = Pt(0)
         
         # Fetch the content of the selected ROS file

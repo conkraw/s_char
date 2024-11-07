@@ -89,7 +89,7 @@ st.session_state.paragraph_text = st.text_area("Enter the text for the note you 
 
 # Manually list ROS and Physical Exam files
 ros_files = [
-    "ros_parent.docx", "ros_rn.docx"
+    "None.docx","ros_parent.docx", "ros_rn.docx"
 ]
 
 physical_exam_files = [

@@ -28,10 +28,7 @@ def create_word_doc(text):
     doc.save(output_path)
     return output_path
 
-# Function to fetch list of .docx files from GitHub repository with improved error handling
-import requests
-
-# Function to fetch list of .docx files from GitHub repository with authentication and improved error handling
+# Function to fetch list of .docx files from GitHub repository with authentication
 def get_github_docs_list(github_repo, folder_path, github_token):
     # GitHub API URL for listing files in a directory
     url = f"https://api.github.com/repos/{github_repo}/contents/{folder_path}"
@@ -55,7 +52,6 @@ def get_github_docs_list(github_repo, folder_path, github_token):
         st.error(f"Failed to fetch files from GitHub repository. Status Code: {response.status_code}")
         st.error(f"Response: {response.text}")
         return []
-
 
 # Function to read and parse a Word document from a raw GitHub URL
 def read_github_doc(github_url):
@@ -158,8 +154,14 @@ room_number = st.text_input("Enter Room Number:")
 github_repo = "conkraw/s_char"  # Replace with your actual GitHub repository
 folder_path = "physicalexam"  # Folder in your GitHub repo containing the exam documents
 
-# Fetch the list of available documents from GitHub
-available_exam_docs = get_github_docs_list(github_repo, folder_path)
+# Streamlit input for GitHub token
+github_token = st.text_input("Enter your GitHub Personal Access Token:")
+
+# Fetch the list of available documents from GitHub using the token
+if github_token:
+    available_exam_docs = get_github_docs_list(github_repo, folder_path, github_token)
+else:
+    st.warning("Please provide your GitHub token to fetch documents.")
 
 # Allow user to select a physical exam document from the available list
 if available_exam_docs:

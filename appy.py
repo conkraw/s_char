@@ -53,13 +53,13 @@ def fetch_physical_exam_content(exam_file_name):
             exam_doc = Document(exam_file_name)
             content = "\n".join([para.text for para in exam_doc.paragraphs])
             os.remove(exam_file_name)  # Remove the local file after reading content
-            return content
+            return exam_doc  # Return the Document object, not just plain text
         else:
             st.error(f"Failed to fetch physical exam content: Status code {response.status_code}")
-            return ""
+            return None
     except requests.exceptions.RequestException as e:
         st.error(f"An error occurred while fetching physical exam content: {e}")
-        return ""
+        return None
 
 # Function to create a Word document with specific font settings and single spacing
 def create_word_doc(text):
@@ -93,11 +93,20 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
         objective_paragraph.paragraph_format.space_before = Pt(0)
         
         # Fetch the content of the selected physical exam day
-        physical_exam_content = fetch_physical_exam_content(physical_exam_day)
+        physical_exam_doc = fetch_physical_exam_content(physical_exam_day)
         
         # Add the fetched content under the OBJECTIVE section
-        if physical_exam_content:
-            doc.add_paragraph(physical_exam_content)
+        if physical_exam_doc:
+            # Loop through each paragraph in the physical exam document and format it
+            for para in physical_exam_doc.paragraphs:
+                new_paragraph = doc.add_paragraph(para.text)
+                new_paragraph.paragraph_format.space_after = Pt(0)
+                new_paragraph.paragraph_format.space_before = Pt(0)
+                
+                # Apply the font size and style to each run in the paragraph
+                for run in new_paragraph.runs:
+                    run.font.name = 'Arial'
+                    run.font.size = Pt(9)
     
     # Add Assessment section
     assessment_paragraph = doc.add_paragraph()
@@ -167,12 +176,6 @@ room_number = st.text_input("Enter Room Number:")
 # Fetch both the diagnoses and physical exam days from GitHub
 physical_exam_days = fetch_physical_exam_days()
 
-# Add the selection input for physical exam day
-if physical_exam_days:
-    selected_exam_day = st.selectbox("Select Physical Examination Day:", physical_exam_days)
-else:
-    selected_exam_day = None
-    
 # Dynamically list available diagnosis documents in the current directory
 available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]
 formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
@@ -180,6 +183,12 @@ formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
 # Sort the formatted conditions alphabetically
 sorted_conditions = sorted(formatted_conditions)
 
+# Add the selection input for physical exam day
+if physical_exam_days:
+    selected_exam_day = st.selectbox("Select Physical Examination Day:", physical_exam_days)
+else:
+    selected_exam_day = None
+    
 selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
 
 assessment_text = st.text_area("Enter Assessment:")
@@ -192,5 +201,4 @@ if st.button("Submit New Note"):
             st.download_button("Download Combined Note", f, file_name=file_name)
     else:
         st.error("Please fill out all fields.")
-
 

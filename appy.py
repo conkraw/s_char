@@ -29,10 +29,14 @@ def create_word_doc(text):
     return output_path
 
 # Function to fetch list of .docx files from GitHub repository with improved error handling
-def get_github_docs_list(github_repo, folder_path):
+import requests
+
+# Function to fetch list of .docx files from GitHub repository with authentication and improved error handling
+def get_github_docs_list(github_repo, folder_path, github_token):
     # GitHub API URL for listing files in a directory
     url = f"https://api.github.com/repos/{github_repo}/contents/{folder_path}"
-    response = requests.get(url)
+    headers = {"Authorization": f"token {github_token}"}  # Add the token to the header
+    response = requests.get(url, headers=headers)
     
     # Check for rate limit or failed request
     if response.status_code == 403:  # Forbidden, possibly rate-limited
@@ -51,6 +55,7 @@ def get_github_docs_list(github_repo, folder_path):
         st.error(f"Failed to fetch files from GitHub repository. Status Code: {response.status_code}")
         st.error(f"Response: {response.text}")
         return []
+
 
 # Function to read and parse a Word document from a raw GitHub URL
 def read_github_doc(github_url):

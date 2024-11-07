@@ -125,7 +125,7 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
     assessment_run.font.name = 'Arial'
     assessment_run.font.size = Pt(9)
     assessment_paragraph.paragraph_format.space_after = Pt(0)
-    assessment_paragraph.paragraph_format.space_before = Pt(0)
+    #assessment_paragraph.paragraph_format.space_before = Pt(0)
     
     assessment_content = doc.add_paragraph(assess_text)
     for run in assessment_content.runs:

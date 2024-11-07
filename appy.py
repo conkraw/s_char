@@ -19,19 +19,11 @@ def create_word_doc(text):
     for line in text.split('\n'):
         p = doc.add_paragraph()
         
-        # Check if the line is exactly "OBJECTIVE:" (on its own line)
-        if line.strip() == "OBJECTIVE:":
-            # If it's the "OBJECTIVE:" line, apply bold and underline
-            objective_run = p.add_run("OBJECTIVE:")
-            objective_run.bold = True
-            objective_run.underline = True
-            objective_run.font.name = 'Arial'
-            objective_run.font.size = Pt(9)
-        else:
-            # Otherwise, apply normal formatting for the text
-            run = p.add_run(line)
-            run.font.name = 'Arial'
-            run.font.size = Pt(9)
+        objective_run = p.add_run("OBJECTIVE:")
+        objective_run.bold = True
+        objective_run.underline = True
+        objective_run.font.name = 'Arial'
+        objective_run.font.size = Pt(9)
 
         p.paragraph_format.space_after = Pt(0)
         p.paragraph_format.space_before = Pt(0)

@@ -1,40 +1,15 @@
 import streamlit as st
 from docx import Document
 from docx.shared import Pt
-import requests
 from io import BytesIO
 
-# Function to read the content of a .docx file from a URL
-def read_docx_from_url(url):
-    response = requests.get(url)
-    doc = Document(BytesIO(response.content))
+# Function to read the content of a .docx file from a BytesIO object
+def read_docx_from_bytes(file_bytes):
+    doc = Document(BytesIO(file_bytes))
     content = []
     for para in doc.paragraphs:
         content.append(para.text)
     return '\n'.join(content)
-
-# Function to fetch the list of .docx files from a GitHub directory
-def get_github_files(github_repo_url, directory):
-    # GitHub API URL to list files in a directory (using GitHub's raw content API)
-    api_url = f"{github_repo_url}/contents/{directory}"
-    
-    try:
-        response = requests.get(api_url)
-        response.raise_for_status()  # Will raise an error for invalid responses
-        files = response.json()
-        
-        # Filter for .docx files and return filenames along with download URLs
-        docx_files = []
-        for file in files:
-            if file['name'].endswith('.docx'):
-                # Construct the raw URL for each .docx file
-                raw_url = file['download_url']
-                docx_files.append({'name': file['name'], 'url': raw_url})
-        
-        return docx_files
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching files from GitHub: {e}")
-        return []
 
 # Function to create a Word document with specific font settings and single spacing
 def create_word_doc(text, ros_text, physical_exam_text):
@@ -112,19 +87,23 @@ if 'paragraph_text' not in st.session_state:
 
 st.session_state.paragraph_text = st.text_area("Enter the text for the note you want to update:", value=st.session_state.paragraph_text)
 
-# Define GitHub URL for your repository (replace with your actual URL)
-github_repo_url = "https://api.github.com/repos/conkraw/s_char"
+# Upload ROS and Physical Exam files manually
+ros_file = st.file_uploader("Upload ROS File", type=["docx"])
+physical_exam_file = st.file_uploader("Upload Physical Exam File", type=["docx"])
 
-# Fetch available ROS and Physical Exam files from GitHub
-ros_files = get_github_files(github_repo_url, "ros")
-physical_exam_files = get_github_files(github_repo_url, "physicalexam")
+# Display ROS and Physical Exam content if the files are uploaded
+ros_text = ""
+physical_exam_text = ""
 
-# Dropdowns for selecting ROS and Physical Exam files
-ros_options = [f["name"] for f in ros_files]
-physical_exam_options = [f["name"] for f in physical_exam_files]
+if ros_file:
+    ros_text = read_docx_from_bytes(ros_file.read())
+    st.write("### Selected ROS Content:")
+    st.text_area("ROS Text", ros_text, height=200)
 
-ros_selection = st.selectbox("Select ROS file:", ros_options)
-physical_exam_selection = st.selectbox("Select Physical Exam file:", physical_exam_options)
+if physical_exam_file:
+    physical_exam_text = read_docx_from_bytes(physical_exam_file.read())
+    st.write("### Selected Physical Exam Content:")
+    st.text_area("Physical Exam Text", physical_exam_text, height=200)
 
 # Allow the user to input their text for replacement
 options = ["Continue", "Will continue", "We will continue", "We shall continue"]
@@ -135,13 +114,6 @@ with col1:
 
 with col2:
     replacement = st.selectbox("Select a replacement phrase:", options)
-
-# Construct the URLs for the selected files
-ros_url = next(f["url"] for f in ros_files if f["name"] == ros_selection)
-physical_exam_url = next(f["url"] for f in physical_exam_files if f["name"] == physical_exam_selection)
-
-ros_text = read_docx_from_url(ros_url)  # Fetch the content of ROS file
-physical_exam_text = read_docx_from_url(physical_exam_url)  # Fetch the content of Physical Exam file
 
 if st.button("Replace"):
     if st.session_state.paragraph_text:
@@ -165,5 +137,4 @@ if st.button("Replace"):
         st.success("Replacement done! Text area cleared.")
     else:
         st.error("Please enter some text to update.")
-
 

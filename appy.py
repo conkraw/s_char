@@ -169,7 +169,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         "The patient requires critical care services as the patient is at high risk of withdrawal, and thus requires intensive care monitoring."
     ]
     
-    selected_critical_care = st.selectbox("Why Critical Care:", critical_care_options)
+    selected_critical_care = st.selectbox("Clinical Indications for Critical Care Services:", critical_care_options)
     
     critical_care_content = doc.add_paragraph(selected_critical_care)
     for run in critical_care_content.runs:

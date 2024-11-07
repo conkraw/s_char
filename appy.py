@@ -77,7 +77,6 @@ def create_word_doc(text):
     doc.save(output_path)
     return output_path
 
-# Function to combine all sections into a single note
 def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=None, free_text_plan=None, physical_exam_day=None, ros_file=None, critical_care_time=None):
     doc = Document()
 
@@ -91,30 +90,45 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     intro_run.font.size = Pt(9)
     intro_paragraph.paragraph_format.space_after = Pt(0)
     intro_paragraph.paragraph_format.space_before = Pt(0)
-    
-    if ros_file == "None.docx":
-        ros_paragraph = doc.add_paragraph()
-        ros_paragraph.paragraph_format.space_after = Pt(0)
-        ros_paragraph.paragraph_format.space_before = Pt(0)
-        
-    # Add Review of Systems section if a ROS file is selected (not empty)
+
+    # Add "OVERNIGHT EVENTS:" section
+    overnight_paragraph = doc.add_paragraph()
+    overnight_header_run = overnight_paragraph.add_run("OVERNIGHT EVENTS: ")
+    overnight_header_run.bold = True
+    overnight_header_run.underline = True
+    overnight_header_run.font.name = 'Arial'
+    overnight_header_run.font.size = Pt(9)
+    overnight_content_run = overnight_paragraph.add_run("No acute events were noted overnight.")
+    overnight_content_run.font.name = 'Arial'
+    overnight_content_run.font.size = Pt(9)
+    overnight_paragraph.paragraph_format.space_after = Pt(0)
+    overnight_paragraph.paragraph_format.space_before = Pt(0)
+
+    # Add "SUBJECTIVE" header and ROS content
     if ros_file != "None.docx":
         ros_paragraph = doc.add_paragraph()
+        
+        # Add SUBJECTIVE heading (bold, underline)
+        ros_run = ros_paragraph.add_run("SUBJECTIVE: ")
+        ros_run.bold = True
+        ros_run.underline = True
+        ros_run.font.name = 'Arial'
+        ros_run.font.size = Pt(9)
+
         ros_paragraph.paragraph_format.space_after = Pt(0)
         ros_paragraph.paragraph_format.space_before = Pt(0)
         
         # Fetch the content of the selected ROS file
         ros_doc = fetch_file_content('ros', ros_file)
-        
-        # Add the fetched content under the REVIEW OF SYSTEMS section
+
         if ros_doc:
             for para in ros_doc.paragraphs:
                 new_paragraph = doc.add_paragraph()
-                
+
                 # Split the paragraph text by the target phrases and apply formatting to those specific phrases
                 text = para.text
                 text_chunks = []
-                
+
                 # Check and split for "OVERNIGHT EVENTS"
                 if "OVERNIGHT EVENTS" in text:
                     text_chunks.extend(text.split("OVERNIGHT EVENTS"))
@@ -140,13 +154,13 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
                         run = new_paragraph.add_run(chunk)
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
-                
+
                 new_paragraph.paragraph_format.space_after = Pt(0)
                 new_paragraph.paragraph_format.space_before = Pt(0)
 
             last_paragraph = doc.add_paragraph()  # Add an empty paragraph
             last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
-            
+
             for run in last_paragraph.runs:
                 run.font.name = 'Arial'
                 run.font.size = Pt(9)
@@ -161,10 +175,10 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         objective_run.font.size = Pt(9)
         objective_paragraph.paragraph_format.space_after = Pt(0)
         objective_paragraph.paragraph_format.space_before = Pt(0)
-        
+
         # Fetch the content of the selected physical exam day
         physical_exam_doc = fetch_file_content('physicalexam', physical_exam_day)
-        
+
         # Add the fetched content under the OBJECTIVE section
         if physical_exam_doc:
             for para in physical_exam_doc.paragraphs:
@@ -174,10 +188,10 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
                 for run in new_paragraph.runs:
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
-            
+
             last_paragraph = doc.add_paragraph()  # Add an empty paragraph
             last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
-            
+
             for run in last_paragraph.runs:
                 run.font.name = 'Arial'
                 run.font.size = Pt(9)
@@ -191,7 +205,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     assessment_run.font.size = Pt(9)
     assessment_paragraph.paragraph_format.space_after = Pt(0)
     assessment_paragraph.paragraph_format.space_before = Pt(0)
-    
+
     assessment_content = doc.add_paragraph(assess_text)
     for run in assessment_content.runs:
         run.font.name = 'Arial'
@@ -207,7 +221,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         critical_care_run.font.size = Pt(9)
         critical_care_paragraph.paragraph_format.space_after = Pt(0)
         critical_care_paragraph.paragraph_format.space_before = Pt(0)
-        
+
         critical_care_content = doc.add_paragraph(critical_care_reason)
         for run in critical_care_content.runs:
             run.font.name = 'Arial'
@@ -232,24 +246,24 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
             diagnosis_run.font.size = Pt(9)
             diagnosis_run.font.name = 'Arial'
             diagnosis_paragraph.paragraph_format.space_before = Pt(0)
-            diagnosis_paragraph.paragraph_format.space_after = Pt(0) 
-            
+            diagnosis_paragraph.paragraph_format.space_after = Pt(0)
+
             diagnosis_doc = Document(diagnosis_key)
             for para in diagnosis_doc.paragraphs:
                 new_paragraph = doc.add_paragraph(para.text)
                 new_paragraph.paragraph_format.space_before = Pt(0)
                 new_paragraph.paragraph_format.space_after = Pt(0)
-                
+
                 for run in new_paragraph.runs:
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
-            
+
     # Append free-text diagnosis and plan if provided
     if free_text_diag and free_text_plan:
         doc.add_paragraph()  # Add a blank line
         doc.add_paragraph(f"Free Text Diagnosis: {free_text_diag}")
         doc.add_paragraph(f"Plan: {free_text_plan}")
-    
+
     # Append Critical Care Time if provided
     if critical_care_time:
         plan_paragraph = doc.add_paragraph()
@@ -261,6 +275,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     output_path = "combined_note.docx"
     doc.save(output_path)
     return output_path
+
 
 # Title of the app
 st.title("Note Management App")

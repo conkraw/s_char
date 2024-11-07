@@ -16,16 +16,20 @@ def format_diagnosis_name(diagnosis):
 def fetch_data():
     # Fetch physical exam days from GitHub
     url_exam = "https://raw.githubusercontent.com/conkraw/s_char/master/physicalexam.txt"
+    physical_exam_days = []
+    
     try:
         response_exam = requests.get(url_exam)
+        
+        # Check if the request was successful
         if response_exam.status_code == 200:
             physical_exam_days = response_exam.text.splitlines()
         else:
-            st.error("Error fetching physical exam days.")
-            physical_exam_days = []
+            st.error(f"Failed to fetch physical exam days: Status code {response_exam.status_code}")
+            st.write(response_exam.text)  # Display the response content for debugging
     except requests.exceptions.RequestException as e:
         st.error(f"An error occurred while fetching physical exam days: {e}")
-        physical_exam_days = []
+        st.write(str(e))  # Display the exception details for debugging
 
     # Dynamically list available diagnosis documents in the current directory
     available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]

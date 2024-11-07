@@ -20,38 +20,24 @@ from docx.shared import Pt
 def create_word_doc(text):
     doc = Document()
 
-    # First, add the "OBJECTIVE:" as the first section
-    objective_paragraph = doc.add_paragraph()
-    objective_run = objective_paragraph.add_run("OBJECTIVE:")
-    objective_run.bold = True
-    objective_run.underline = True
-    objective_run.font.name = 'Arial'
-    objective_run.font.size = Pt(9)
-
-    # Ensure no styles are applied to the "OBJECTIVE:" paragraph
-    objective_paragraph.style = None  # Remove any default styles (e.g., Heading 1)
-    objective_paragraph.alignment = 0  # Align left (optional)
-    objective_paragraph.paragraph_format.space_after = Pt(0)
-    objective_paragraph.paragraph_format.space_before = Pt(0)
-    objective_paragraph.paragraph_format.line_spacing = Pt(12)  # Single line spacing
-
-    # Now, add the rest of the content after "OBJECTIVE:"
-    for line in text.split('\n'):
-        p = doc.add_paragraph()
-        run = p.add_run(line)
+    assessment_paragraph = doc.add_paragraph()
+    assessment_run = assessment_paragraph.add_run("OBJECTIVE:")
+    assessment_run.bold = True
+    assessment_run.underline = True
+    assessment_run.font.name = 'Arial'
+    assessment_run.font.size = Pt(9)
+    assessment_paragraph.paragraph_format.space_after = Pt(0)
+    assessment_paragraph.paragraph_format.space_before = Pt(0)
+    
+    assessment_content = doc.add_paragraph(assess_text)
+    for run in assessment_content.runs:
         run.font.name = 'Arial'
         run.font.size = Pt(9)
-
-        # Set paragraph spacing to ensure single line spacing
-        p.paragraph_format.space_after = Pt(0)
-        p.paragraph_format.space_before = Pt(0)
-        p.paragraph_format.line_spacing = Pt(12)  # Apply single line spacing to all paragraphs
-
+        
     # Save the document
     output_path = "updated_note.docx"
     doc.save(output_path)
     return output_path
-
 
 # Function to fetch the raw content of a Word document directly from GitHub (via raw URL)
 def read_github_doc(github_url):

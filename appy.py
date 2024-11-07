@@ -3,7 +3,6 @@ from docx import Document
 from docx.shared import Pt
 import os
 import re
-import requests
 
 # Function to format diagnosis names
 def format_diagnosis_name(diagnosis):
@@ -23,43 +22,15 @@ def create_word_doc(text):
         run.font.size = Pt(9)
         p.paragraph_format.space_after = Pt(0)
         p.paragraph_format.space_before = Pt(0)
+        #p.paragraph_format.line_spacing = Pt(12)
 
     output_path = "updated_note.docx"
     doc.save(output_path)
     return output_path
 
-# Function to fetch the physical exam day documents from GitHub
-def fetch_physical_exam_docs():
-    # GitHub raw file URL for the physical exam documents
-    url = 'https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam'
-    # Get a list of files in the repository
-    response = requests.get(url)
-    if response.status_code == 200:
-        files = response.text.splitlines()
-        return files  # List of file names
-    else:
-        st.error("Error fetching files from GitHub.")
-        return []
-
 # Function to combine diagnosis documents with formatted input text
-def combine_notes(physical_exam_text, assess_text, diagnoses, free_text_diag=None, free_text_plan=None):
+def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=None):
     doc = Document()
-    
-    # Objective Section (Physical Exam)
-    objective_paragraph = doc.add_paragraph()
-    objective_run = objective_paragraph.add_run("OBJECTIVE:")
-    objective_run.bold = True
-    objective_run.underline = True
-    objective_run.font.name = 'Arial'
-    objective_run.font.size = Pt(9)
-    objective_paragraph.paragraph_format.space_after = Pt(0)
-    objective_paragraph.paragraph_format.space_before = Pt(0)
-    
-    # Add physical exam content
-    objective_content = doc.add_paragraph(physical_exam_text)
-    for run in objective_content.runs:
-        run.font.name = 'Arial'
-        run.font.size = Pt(9)
     
     # Assessment section
     assessment_paragraph = doc.add_paragraph()
@@ -138,30 +109,18 @@ diagnosis_mapping = {format_diagnosis_name(doc): doc for doc in available_docs}
 
 selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
 
-# Fetch available physical exam documents from GitHub
-exam_docs = fetch_physical_exam_docs()
-
-# Let the user select a physical exam document
-selected_exam = st.selectbox("Select Physical Exam Day:", exam_docs)
-
 # Input for free text diagnosis and plan
+#free_text_diagnosis = st.text_input("Enter Free Text Diagnosis:")
+#free_text_plan = st.text_area("Enter Plan for Free Text Diagnosis:")
+
 assessment_text = st.text_area("Enter Assessment:")
 
 if st.button("Submit New Note"):
-    if selected_conditions and assessment_text and room_number and selected_exam:
-        # Fetch the physical exam content from GitHub (assuming raw text files)
-        exam_url = f'https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/{selected_exam}'
-        exam_response = requests.get(exam_url)
-        if exam_response.status_code == 200:
-            physical_exam_text = exam_response.text
-            combined_file = combine_notes(physical_exam_text, assessment_text, selected_conditions)
-            file_name = f"{room_number}.docx"
-            with open(combined_file, "rb") as f:
-                st.download_button("Download Combined Note", f, file_name=file_name)
-        else:
-            st.error("Error fetching the selected physical exam document.")
+    if selected_conditions and assessment_text and room_number:
+        combined_file = combine_notes(assessment_text, selected_conditions) #free_text_diagnosis,#free_text_plan)
+        file_name = f"{room_number}.docx"
+        with open(combined_file, "rb") as f:
+            st.download_button("Download Combined Note", f, file_name=file_name)
     else:
         st.error("Please fill out all fields.")
-
-
 

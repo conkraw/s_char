@@ -158,10 +158,6 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
                 new_paragraph.paragraph_format.space_after = Pt(0)
                 new_paragraph.paragraph_format.space_before = Pt(0)
 
-            for run in last_paragraph.runs:
-                run.font.name = 'Arial'
-                run.font.size = Pt(9)
-
     # Add Objective section if a physical exam day is selected
     if physical_exam_day:
         objective_paragraph = doc.add_paragraph()

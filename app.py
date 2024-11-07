@@ -108,7 +108,7 @@ if 'paragraph_text' not in st.session_state:
 st.session_state.paragraph_text = st.text_area("Enter the text for the note you want to update:", value=st.session_state.paragraph_text)
 
 # Define GitHub URL for your repository (replace with your actual URL)
-github_repo_url = "https://api.github.com/repos/your-username/your-repo"
+github_repo_url = "https://api.github.com/repos/conkraw/s_char"
 
 # Fetch available ROS and Physical Exam files from GitHub
 ros_files = get_github_files(github_repo_url, "conkraw/s_char/ros")

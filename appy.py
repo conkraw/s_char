@@ -12,33 +12,30 @@ def format_diagnosis_name(diagnosis):
     formatted_name = formatted_name.title()
     return formatted_name
 
-# Function to fetch both physical exam days and diagnosis files
-def fetch_data():
-    # Fetch physical exam days from GitHub
-    url_exam = "https://raw.githubusercontent.com/conkraw/s_char/master/physicalexam.txt"
+# Function to fetch physical exam day files from GitHub repository
+def fetch_physical_exam_days():
+    url = "https://api.github.com/repos/conkraw/s_char/contents/physicalexam"
     physical_exam_days = []
     
     try:
-        response_exam = requests.get(url_exam)
+        # Send GET request to GitHub API to fetch contents of the 'physicalexam' folder
+        response = requests.get(url)
         
-        # Check if the request was successful
-        if response_exam.status_code == 200:
-            physical_exam_days = response_exam.text.splitlines()
+        if response.status_code == 200:
+            # Parse the response JSON
+            files = response.json()
+            for file in files:
+                # Filter out only .docx files (assuming they are the physical exam day files)
+                if file['name'].endswith('.docx'):
+                    physical_exam_days.append(file['name'])
         else:
-            st.error(f"Failed to fetch physical exam days: Status code {response_exam.status_code}")
-            st.write(response_exam.text)  # Display the response content for debugging
+            st.error(f"Failed to fetch physical exam days: Status code {response.status_code}")
+            st.write(response.text)  # Display the response content for debugging
     except requests.exceptions.RequestException as e:
         st.error(f"An error occurred while fetching physical exam days: {e}")
         st.write(str(e))  # Display the exception details for debugging
-
-    # Dynamically list available diagnosis documents in the current directory
-    available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]
-    formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
-
-    # Create a mapping for formatted names to original filenames
-    diagnosis_mapping = {format_diagnosis_name(doc): doc for doc in available_docs}
-
-    return physical_exam_days, formatted_conditions, diagnosis_mapping
+    
+    return physical_exam_days
 
 # Function to create a Word document with specific font settings and single spacing
 def create_word_doc(text):
@@ -140,7 +137,11 @@ st.header("Create a New Note")
 room_number = st.text_input("Enter Room Number:")
 
 # Fetch both the diagnoses and physical exam days from GitHub
-physical_exam_days, formatted_conditions, diagnosis_mapping = fetch_data()
+physical_exam_days = fetch_physical_exam_days()
+
+# Dynamically list available diagnosis documents in the current directory
+available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]
+formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
 
 # Sort the formatted conditions alphabetically
 sorted_conditions = sorted(formatted_conditions)

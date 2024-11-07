@@ -108,7 +108,7 @@ if 'paragraph_text' not in st.session_state:
 st.session_state.paragraph_text = st.text_area("Enter the text for the note you want to update:", value=st.session_state.paragraph_text)
 
 # Define GitHub URL for your repository (replace with your actual URL)
-github_repo_url = "https://api.github.com/repos/conkraw/s_char"
+github_repo_url = "https://api.github.com/repos/conkraw/s_char/contents/"
 
 # Fetch available ROS and Physical Exam files from GitHub
 ros_files = get_github_files(github_repo_url, "conkraw/s_char/ros")
@@ -129,8 +129,8 @@ with col2:
     replacement = st.selectbox("Select a replacement phrase:", options)
 
 # Construct the URLs for the selected files
-ros_url = f"https://raw.githubusercontent.com/conkraw/s_char/main/ros/{ros_selection}"
-physical_exam_url = f"https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/{physical_exam_selection}"
+ros_url = f"https://api.github.com/repos/conkraw/s_char/contents/ros/{ros_selection}"
+physical_exam_url = f"https://api.github.com/repos/conkraw/s_char/contents/physicalexam/{physical_exam_selection}"
 
 ros_text = read_docx_from_url(ros_url)  # Fetch the content of ROS file
 physical_exam_text = read_docx_from_url(physical_exam_url)  # Fetch the content of Physical Exam file

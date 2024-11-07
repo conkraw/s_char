@@ -122,6 +122,14 @@ with ThreadPoolExecutor() as executor:
     ros_files = ros_future.result()
     physical_exam_files = physical_exam_future.result()
 
+# Debug: Check if Physical Exam files are being fetched
+st.write(f"ROS Files: {ros_files}")
+st.write(f"Physical Exam Files: {physical_exam_files}")
+
+# Handle case where no Physical Exam files are fetched
+if not physical_exam_files:
+    st.error("No Physical Exam files found in the repository.")
+
 # Dropdowns for selecting ROS and Physical Exam files
 ros_options = [f["name"] for f in ros_files]
 physical_exam_options = [f["name"] for f in physical_exam_files]
@@ -168,5 +176,6 @@ if st.button("Replace"):
         st.success("Replacement done! Text area cleared.")
     else:
         st.error("Please enter some text to update.")
+
 
 

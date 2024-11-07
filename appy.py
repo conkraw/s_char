@@ -290,10 +290,6 @@ st.header("Create a New Note")
 # Input for room number
 room_number = st.text_input("Enter Room Number:")
 
-# Fetch both the diagnoses and physical exam days from GitHub
-#physical_exam_days = fetch_files_from_github('physicalexam')
-#ros_files = fetch_files_from_github('ros')
-
 ros_files = {
     "None": "https://raw.githubusercontent.com/conkraw/s_char/main/ros/None.docx",
     "ROS_PARENT": "https://raw.githubusercontent.com/conkraw/s_char/main/ros/ros_parent.docx",

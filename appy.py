@@ -12,6 +12,30 @@ def format_diagnosis_name(diagnosis):
     formatted_name = formatted_name.title()
     return formatted_name
 
+# Function to fetch both physical exam days and diagnosis files
+def fetch_data():
+    # Fetch physical exam days from GitHub
+    url_exam = "https://raw.githubusercontent.com/conkraw/s_char/master/physicalexam.txt"
+    try:
+        response_exam = requests.get(url_exam)
+        if response_exam.status_code == 200:
+            physical_exam_days = response_exam.text.splitlines()
+        else:
+            st.error("Error fetching physical exam days.")
+            physical_exam_days = []
+    except requests.exceptions.RequestException as e:
+        st.error(f"An error occurred while fetching physical exam days: {e}")
+        physical_exam_days = []
+
+    # Dynamically list available diagnosis documents in the current directory
+    available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]
+    formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
+
+    # Create a mapping for formatted names to original filenames
+    diagnosis_mapping = {format_diagnosis_name(doc): doc for doc in available_docs}
+
+    return physical_exam_days, formatted_conditions, diagnosis_mapping
+
 # Function to create a Word document with specific font settings and single spacing
 def create_word_doc(text):
     doc = Document()
@@ -27,17 +51,6 @@ def create_word_doc(text):
     output_path = "updated_note.docx"
     doc.save(output_path)
     return output_path
-
-# Function to fetch physical exam days from GitHub
-def get_physical_exam_days():
-    url = "https://raw.githubusercontent.com/conkraw/s_char/master/physicalexam.txt"  # URL to the raw text file
-    response = requests.get(url)
-    
-    if response.status_code == 200:
-        return response.text.splitlines()  # Returns a list of days from the file
-    else:
-        st.error("Error fetching physical exam days.")
-        return []
 
 # Function to combine diagnosis documents with formatted input text
 def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=None, physical_exam_day=None):
@@ -122,25 +135,21 @@ st.header("Create a New Note")
 # Input for room number
 room_number = st.text_input("Enter Room Number:")
 
-# Dynamically list available diagnosis documents in the current directory
-available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]
-formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
+# Fetch both the diagnoses and physical exam days from GitHub
+physical_exam_days, formatted_conditions, diagnosis_mapping = fetch_data()
 
 # Sort the formatted conditions alphabetically
 sorted_conditions = sorted(formatted_conditions)
-
-# Create a mapping for formatted names to original filenames
-diagnosis_mapping = {format_diagnosis_name(doc): doc for doc in available_docs}
 
 selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
 
 assessment_text = st.text_area("Enter Assessment:")
 
-# Get the list of physical exam days from GitHub
-physical_exam_days = get_physical_exam_days()
-
 # Add the selection input for physical exam day
-selected_exam_day = st.selectbox("Select Physical Examination Day:", physical_exam_days)
+if physical_exam_days:
+    selected_exam_day = st.selectbox("Select Physical Examination Day:", physical_exam_days)
+else:
+    selected_exam_day = None
 
 if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:

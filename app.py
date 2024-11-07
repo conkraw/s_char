@@ -116,8 +116,8 @@ st.session_state.paragraph_text = st.text_area("Enter the text for the note you 
 github_repo_url = "https://api.github.com/repos/conkraw/s_char"
 
 # Fetch available ROS and Physical Exam files from GitHub
-ros_files = get_github_files(github_repo_url, "conkraw/s_char/ros")
-physical_exam_files = get_github_files(github_repo_url, "conkraw/s_char/physicalexam")
+ros_files = get_github_files(github_repo_url, "ros")
+physical_exam_files = get_github_files(github_repo_url, "physicalexam")
 
 # Dropdowns for selecting ROS and Physical Exam files
 ros_options = [f["name"] for f in ros_files]
@@ -165,5 +165,4 @@ if st.button("Replace"):
         st.success("Replacement done! Text area cleared.")
     else:
         st.error("Please enter some text to update.")
-
 

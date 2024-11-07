@@ -23,6 +23,8 @@ def create_word_doc(text):
     objective_run.underline = True
     objective_run.font.name = 'Arial'
     objective_run.font.size = Pt(9)
+
+    objective_paragraph.style = 'Normal'
     
     # Add a space after the title to separate it from the content
     objective_paragraph.paragraph_format.space_after = Pt(0)

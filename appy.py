@@ -28,6 +28,16 @@ def create_word_doc(text):
     objective_paragraph.paragraph_format.space_after = Pt(0)
     objective_paragraph.paragraph_format.space_before = Pt(0)
 
+    # Now, add the rest of the content after "OBJECTIVE:"
+    for line in text.split('\n'):
+        p = doc.add_paragraph()
+        run = p.add_run(line)
+        run.font.name = 'Arial'
+        run.font.size = Pt(9)
+
+        # Set paragraph spacing to ensure single line spacing
+        p.paragraph_format.space_after = Pt(0)
+        p.paragraph_format.space_before = Pt(0)
 
     # Save the document
     output_path = "updated_note.docx"
@@ -63,12 +73,15 @@ def get_github_docs_list(github_repo, folder_path):
         doc_files = [file['name'] for file in files if file['name'].endswith('.docx')]
         return doc_files
     else:
-        #st.error(f"Failed to fetch files from GitHub repository. Status Code: {response.status_code}")
+        st.error(f"Failed to fetch files from GitHub repository. Status Code: {response.status_code}")
         return []
 
 # Function to combine diagnosis documents with formatted input text
 def combine_notes(physical_exam_text, assess_text, diagnoses, free_text_diag=None, free_text_plan=None):
     doc = Document()
+
+    # First, add the "OBJECTIVE:" section
+    doc.add_paragraph("OBJECTIVE:", style='Heading 1')
 
     # Physical Exam Section (first)
     if physical_exam_text:

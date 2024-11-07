@@ -34,9 +34,7 @@ def create_word_doc(text, ros_text, physical_exam_text):
     # Add ROS if selected
     if ros_text:
         ros_paragraph = doc.add_paragraph()
-        ros_run.font.name = 'Arial'
-        ros_run.font.size = Pt(9)
-
+        
     # Add Physical Exam (always required)
     physical_exam_paragraph = doc.add_paragraph()
     physical_exam_run = physical_exam_paragraph.add_run("OBJECTIVE:\n" + physical_exam_text)

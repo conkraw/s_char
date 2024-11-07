@@ -23,8 +23,13 @@ def get_github_files(github_repo_url, directory):
         response.raise_for_status()  # Will raise an error for invalid responses
         files = response.json()
         
-        # Filter for .docx files
-        docx_files = [file['name'] for file in files if file['name'].endswith('.docx')]
+        # Filter for .docx files and return filenames along with download URLs
+        docx_files = []
+        for file in files:
+            if file['name'].endswith('.docx'):
+                # Construct the raw URL for each .docx file
+                raw_url = file['download_url']
+                docx_files.append({'name': file['name'], 'url': raw_url})
         
         return docx_files
     except requests.exceptions.RequestException as e:
@@ -108,15 +113,18 @@ if 'paragraph_text' not in st.session_state:
 st.session_state.paragraph_text = st.text_area("Enter the text for the note you want to update:", value=st.session_state.paragraph_text)
 
 # Define GitHub URL for your repository (replace with your actual URL)
-github_repo_url = "https://api.github.com/repos/conkraw/s_char/contents/"
+github_repo_url = "https://api.github.com/repos/conkraw/s_char"
 
 # Fetch available ROS and Physical Exam files from GitHub
 ros_files = get_github_files(github_repo_url, "conkraw/s_char/ros")
 physical_exam_files = get_github_files(github_repo_url, "conkraw/s_char/physicalexam")
 
 # Dropdowns for selecting ROS and Physical Exam files
-ros_selection = st.selectbox("Select ROS file:", ros_files)
-physical_exam_selection = st.selectbox("Select Physical Exam file:", physical_exam_files)
+ros_options = [f["name"] for f in ros_files]
+physical_exam_options = [f["name"] for f in physical_exam_files]
+
+ros_selection = st.selectbox("Select ROS file:", ros_options)
+physical_exam_selection = st.selectbox("Select Physical Exam file:", physical_exam_options)
 
 # Allow the user to input their text for replacement
 options = ["Continue", "Will continue", "We will continue", "We shall continue"]
@@ -129,8 +137,8 @@ with col2:
     replacement = st.selectbox("Select a replacement phrase:", options)
 
 # Construct the URLs for the selected files
-ros_url = f"https://api.github.com/repos/conkraw/s_char/contents/ros/{ros_selection}"
-physical_exam_url = f"https://api.github.com/repos/conkraw/s_char/contents/physicalexam/{physical_exam_selection}"
+ros_url = next(f["url"] for f in ros_files if f["name"] == ros_selection)
+physical_exam_url = next(f["url"] for f in physical_exam_files if f["name"] == physical_exam_selection)
 
 ros_text = read_docx_from_url(ros_url)  # Fetch the content of ROS file
 physical_exam_text = read_docx_from_url(physical_exam_url)  # Fetch the content of Physical Exam file
@@ -157,4 +165,5 @@ if st.button("Replace"):
         st.success("Replacement done! Text area cleared.")
     else:
         st.error("Please enter some text to update.")
+
 

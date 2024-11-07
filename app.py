@@ -87,11 +87,43 @@ if 'paragraph_text' not in st.session_state:
 
 st.session_state.paragraph_text = st.text_area("Enter the text for the note you want to update:", value=st.session_state.paragraph_text)
 
-# Upload ROS and Physical Exam files manually
-ros_file = st.file_uploader("Upload ROS File", type=["docx"])
-physical_exam_file = st.file_uploader("Upload Physical Exam File", type=["docx"])
+# Manually list ROS and Physical Exam files
+ros_files = [
+    "ros_parent.docx", "ros_rn.docx"
+]
 
-# Display ROS and Physical Exam content if the files are uploaded
+physical_exam_files = [
+    "Adolescent_Physical_Exam_Day0.docx", "Adolescent_Physical_Exam_Day1.docx", "Adolescent_Physical_Exam_Day2.docx", 
+    "Adolescent_Physical_Exam_Day3.docx", "Adolescent_Physical_Exam_Day4.docx", "Adolescent_Physical_Exam_Day5.docx", "Adolescent_Physical_Exam_Day6.docx",
+    "Child_Physical_Exam_Day0.docx", "Child_Physical_Exam_Day1.docx", "Child_Physical_Exam_Day2.docx", 
+    "Child_Physical_Exam_Day3.docx", "Child_Physical_Exam_Day4.docx", "Child_Physical_Exam_Day5.docx", "Child_Physical_Exam_Day6.docx",
+    "Chronic_Physical_Exam_Day0.docx", "Chronic_Physical_Exam_Day1.docx", "Chronic_Physical_Exam_Day2.docx", 
+    "Chronic_Physical_Exam_Day3.docx", "Chronic_Physical_Exam_Day4.docx", "Chronic_Physical_Exam_Day5.docx", "Chronic_Physical_Exam_Day6.docx",
+    "Infant_Physical_Exam_Day0.docx", "Infant_Physical_Exam_Day1.docx", "Infant_Physical_Exam_Day2.docx", 
+    "Infant_Physical_Exam_Day3.docx", "Infant_Physical_Exam_Day4.docx", "Infant_Physical_Exam_Day5.docx", "Infant_Physical_Exam_Day6.docx"
+]
+
+# Dropdown for selecting ROS file
+ros_selection = st.selectbox("Select ROS file:", ros_files)
+
+# Dropdown for selecting Physical Exam file
+physical_exam_selection = st.selectbox("Select Physical Exam file:", physical_exam_files)
+
+# Allow the user to input their text for replacement
+options = ["Continue", "Will continue", "We will continue", "We shall continue"]
+col1, col2 = st.columns(2)
+
+with col1:
+    selected_option = st.selectbox("Select a phrase to replace:", options)
+
+with col2:
+    replacement = st.selectbox("Select a replacement phrase:", options)
+
+# Allow file uploads for the selected ROS and Physical Exam
+ros_file = st.file_uploader(f"Upload selected ROS file ({ros_selection})", type=["docx"])
+physical_exam_file = st.file_uploader(f"Upload selected Physical Exam file ({physical_exam_selection})", type=["docx"])
+
+# If files are uploaded, read their content
 ros_text = ""
 physical_exam_text = ""
 
@@ -104,16 +136,6 @@ if physical_exam_file:
     physical_exam_text = read_docx_from_bytes(physical_exam_file.read())
     st.write("### Selected Physical Exam Content:")
     st.text_area("Physical Exam Text", physical_exam_text, height=200)
-
-# Allow the user to input their text for replacement
-options = ["Continue", "Will continue", "We will continue", "We shall continue"]
-col1, col2 = st.columns(2)
-
-with col1:
-    selected_option = st.selectbox("Select a phrase to replace:", options)
-
-with col2:
-    replacement = st.selectbox("Select a replacement phrase:", options)
 
 if st.button("Replace"):
     if st.session_state.paragraph_text:

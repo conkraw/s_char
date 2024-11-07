@@ -43,8 +43,6 @@ def create_word_doc(text, ros_text, physical_exam_text):
     physical_exam_run = physical_exam_paragraph.add_run("OBJECTIVE:\n" + physical_exam_text)
     physical_exam_run.font.name = 'Arial'
     physical_exam_run.font.size = Pt(9)
-    physical_exam_run.bold = True
-    physical_exam_run.underline = True
     
     # Process the rest of the text passed into the function
     sections = text.split('\n')

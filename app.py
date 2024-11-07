@@ -62,6 +62,7 @@ def create_word_doc(text, ros_text, physical_exam_text):
         ros_content_run = ros_paragraph.add_run("\n" + ros_text)
         ros_content_run.font.name = 'Arial'
         ros_content_run.font.size = Pt(9)
+        ros_content_run.italic = True 
         
     # Now we handle the "OBJECTIVE:" section and the rest of the physical exam content
     physical_exam_lines = physical_exam_text.split("\n")

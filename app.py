@@ -34,7 +34,7 @@ def create_word_doc(text, ros_text, physical_exam_text):
     # Add ROS if selected
     if ros_text:
         ros_paragraph = doc.add_paragraph()
-        ros_run = ros_text
+        ros_run = ros_paragraph.add_run(ros_text)
         ros_run.font.name = 'Arial'
         ros_run.font.size = Pt(9)
         
@@ -54,7 +54,7 @@ def create_word_doc(text, ros_text, physical_exam_text):
         
         # Set font properties for the rest of the document
         run.font.name = 'Arial'
-        run.font.size = Pt(10)
+        run.font.size = Pt(9)
 
         # Check for "ASSESSMENT:" and "PLAN:" to apply bold and underline
         if section.startswith("ASSESSMENT:"):

@@ -107,6 +107,8 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
                 for run in new_paragraph.runs:
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
+            
+            doc.add_paragraph()
     
     # Add Assessment section
     assessment_paragraph = doc.add_paragraph()

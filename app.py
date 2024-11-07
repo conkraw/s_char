@@ -101,42 +101,39 @@ ros_files = {
 }
 
 physical_exam_files = {
-    # Adolescent Physical Exam (Day 0 to Day 7)
     "Adolescent Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day0.docx",
     "Infant Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day0.docx",
+    "Child Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day0.docx",
+    "Chronic Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day0.docx",
     
     "Adolescent Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day1.docx",
-    "Adolescent Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day2.docx",
-    "Adolescent Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day3.docx",
-    "Adolescent Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day4.docx",
-    "Adolescent Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day5.docx",
-    "Adolescent Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day6.docx",
-
-    # Infant Physical Exam (Day 0 to Day 7)
-
     "Infant Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day1.docx",
-    "Infant Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day2.docx",
-    "Infant Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day3.docx",
-    "Infant Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day4.docx",
-    "Infant Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day5.docx",
-    "Infant Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day6.docx",
-
-    # Child Physical Exam (Day 0 to Day 7)
-    "Child Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day0.docx",
     "Child Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day1.docx",
-    "Child Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day2.docx",
-    "Child Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day3.docx",
-    "Child Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day4.docx",
-    "Child Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day5.docx",
-    "Child Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day6.docx",
-
-    # Chronic Physical Exam (Day 0 to Day 7)
-    "Chronic Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day0.docx",
     "Chronic Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day1.docx",
+    
+    "Adolescent Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day2.docx",
+    "Infant Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day2.docx",
+    "Child Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day2.docx",
     "Chronic Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day2.docx",
+    
+    "Adolescent Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day3.docx",
+    "Infant Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day3.docx",
+    "Child Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day3.docx",
     "Chronic Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day3.docx",
+    
+    "Adolescent Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day4.docx",
+    "Infant Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day4.docx",
+    "Child Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day4.docx",
     "Chronic Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day4.docx",
+    
+    "Adolescent Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day5.docx",
+    "Infant Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day5.docx",
+    "Child Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day5.docx",
     "Chronic Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day5.docx",
+    
+    "Adolescent Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day6.docx",
+    "Infant Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day6.docx",
+    "Child Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day6.docx",
     "Chronic Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day6.docx",
 }
 

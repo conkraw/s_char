@@ -30,25 +30,24 @@ def create_word_doc(text, ros_text, physical_exam_text):
     intro_run.italic = True  # Set the intro text to be italicized
     intro_run.font.name = 'Arial'  # Set the font to Arial
     intro_run.font.size = Pt(9)   # Set the font size to 9
-
-    # Add a line break after the introductory statement
-    doc.add_paragraph()  # This adds a blank line after the intro text
     
     # Add ROS if selected
     if ros_text:
         ros_paragraph = doc.add_paragraph()
-        ros_run = ros_paragraph.add_run("Review of Systems:\n" + ros_text)
+        ros_run = ros_paragraph.add_run("SUBJECTIVE:\n" + ros_text)
         ros_run.font.name = 'Arial'
-        ros_run.font.size = Pt(10)
-        doc.add_paragraph()  # Add a blank line after ROS
+        ros_run.font.size = Pt(9)
+        ros_run.bold = True
+        ros_run.underline = True
 
     # Add Physical Exam (always required)
     physical_exam_paragraph = doc.add_paragraph()
-    physical_exam_run = physical_exam_paragraph.add_run("Physical Exam:\n" + physical_exam_text)
+    physical_exam_run = physical_exam_paragraph.add_run("OBJECTIVE:\n" + physical_exam_text)
     physical_exam_run.font.name = 'Arial'
-    physical_exam_run.font.size = Pt(10)
-    doc.add_paragraph()  # Add a blank line after Physical Exam
-
+    physical_exam_run.font.size = Pt(9)
+    physical_exam_run.bold = True
+    physical_exam_run.underline = True
+    
     # Process the rest of the text passed into the function
     sections = text.split('\n')
     for section in sections:

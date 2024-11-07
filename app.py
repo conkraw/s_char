@@ -36,14 +36,14 @@ def create_word_doc(text, ros_text, physical_exam_text):
     overnight_paragraph = doc.add_paragraph()
     
     # "OVERNIGHT EVENTS:" header
-    overnight_header_run = overnight_paragraph.add_run("OVERNIGHT EVENTS: ")
+    overnight_header_run = overnight_paragraph.add_run("OVERNIGHT EVENTS:")
     overnight_header_run.bold = True
     overnight_header_run.underline = True
     overnight_header_run.font.name = 'Arial'
     overnight_header_run.font.size = Pt(9)
     
     # "No acute events were noted overnight" content (no bold/underline)
-    overnight_content_run = overnight_paragraph.add_run("No acute events were noted overnight")
+    overnight_content_run = overnight_paragraph.add_run(" No acute events were noted overnight")
     overnight_content_run.font.name = 'Arial'
     overnight_content_run.font.size = Pt(9)
     

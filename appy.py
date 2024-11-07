@@ -4,7 +4,6 @@ from docx.shared import Pt
 import os
 import re
 import requests
-from bs4 import BeautifulSoup
 
 # Function to format diagnosis names
 def format_diagnosis_name(diagnosis):
@@ -47,19 +46,18 @@ def read_github_doc(github_url):
         st.error(f"Error downloading the document from GitHub. Status Code: {response.status_code}")
         return None
 
-# Function to get all .docx files from a GitHub directory (using raw HTML scraping)
+# Function to fetch the list of .docx files from the GitHub repository
 def get_github_docs_list(github_repo, folder_path):
-    url = f"https://github.com/{github_repo}/tree/main/{folder_path}"  # GitHub folder URL
+    url = f"https://api.github.com/repos/{github_repo}/contents/{folder_path}"
     response = requests.get(url)
+    
     if response.status_code == 200:
-        # Parse the HTML content to find .docx file links
-        soup = BeautifulSoup(response.content, "html.parser")
-        # Look for links to files that end in .docx
-        links = soup.find_all("a", href=True)
-        doc_files = [link['href'].split('/')[-1] for link in links if link['href'].endswith('.docx')]
+        files = response.json()
+        # Filter only .docx files
+        doc_files = [file['name'] for file in files if file['name'].endswith('.docx')]
         return doc_files
     else:
-        st.error(f"Failed to fetch files from GitHub repository: {response.status_code}")
+        st.error(f"Failed to fetch files from GitHub repository. Status Code: {response.status_code}")
         return []
 
 # Function to combine diagnosis documents with formatted input text
@@ -104,7 +102,7 @@ def combine_notes(physical_exam_text, assess_text, diagnoses, free_text_diag=Non
     for i, diagnosis in enumerate(diagnoses, start=1):
         diagnosis_key = diagnosis.lower().replace(' ', '_') + '.docx'
         
-        # Create the raw URL for the diagnosis document from your GitHub repo
+        # Construct the raw URL for the diagnosis document from your GitHub repo
         diagnosis_url = f"https://raw.githubusercontent.com/conkraw/s_char/main/diagnoses/{diagnosis_key}"
         
         # Download and add diagnosis content if it exists

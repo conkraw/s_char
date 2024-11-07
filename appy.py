@@ -85,7 +85,7 @@ def create_word_doc(text):
     doc.save(output_path)
     return output_path
 
-def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=None, free_text_plan=None, physical_exam_day=None, ros_file=None, critical_care_time=None):
+def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=None, free_text_plan=None, physical_exam_day, ros_file, critical_care_time=None):
     doc = Document()
 
     # Add the introductory statement at the top (italicized, Arial, font size 9)

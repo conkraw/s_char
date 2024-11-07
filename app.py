@@ -1,11 +1,40 @@
 import streamlit as st
 from docx import Document
 from docx.shared import Pt
+import requests
+from io import BytesIO
+
+# Function to read the content of a .docx file from a URL
+def read_docx_from_url(url):
+    response = requests.get(url)
+    doc = Document(BytesIO(response.content))
+    content = []
+    for para in doc.paragraphs:
+        content.append(para.text)
+    return '\n'.join(content)
+
+# Function to fetch the list of .docx files from a GitHub directory
+def get_github_files(github_repo_url, directory):
+    # GitHub API URL to list files in a directory (using GitHub's raw content API)
+    api_url = f"{github_repo_url}/contents/{directory}"
+    
+    try:
+        response = requests.get(api_url)
+        response.raise_for_status()  # Will raise an error for invalid responses
+        files = response.json()
+        
+        # Filter for .docx files
+        docx_files = [file['name'] for file in files if file['name'].endswith('.docx')]
+        
+        return docx_files
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching files from GitHub: {e}")
+        return []
 
 # Function to create a Word document with specific font settings and single spacing
-def create_word_doc(text):
+def create_word_doc(text, ros_text, physical_exam_text):
     doc = Document()
-    
+
     # The specific phrase to add at the top of the document
     intro_text = (
         "I personally examined the patient separately and discussed the case with the resident/physician assistant "
@@ -21,8 +50,23 @@ def create_word_doc(text):
     intro_run.font.size = Pt(9)   # Set the font size to 9
 
     # Add a line break after the introductory statement
-    #doc.add_paragraph()  # This adds a blank line after the intro text
+    doc.add_paragraph()  # This adds a blank line after the intro text
     
+    # Add ROS if selected
+    if ros_text:
+        ros_paragraph = doc.add_paragraph()
+        ros_run = ros_paragraph.add_run("Review of Systems:\n" + ros_text)
+        ros_run.font.name = 'Arial'
+        ros_run.font.size = Pt(10)
+        doc.add_paragraph()  # Add a blank line after ROS
+
+    # Add Physical Exam (always required)
+    physical_exam_paragraph = doc.add_paragraph()
+    physical_exam_run = physical_exam_paragraph.add_run("Physical Exam:\n" + physical_exam_text)
+    physical_exam_run.font.name = 'Arial'
+    physical_exam_run.font.size = Pt(10)
+    doc.add_paragraph()  # Add a blank line after Physical Exam
+
     # Process the rest of the text passed into the function
     sections = text.split('\n')
     for section in sections:
@@ -31,7 +75,7 @@ def create_word_doc(text):
         
         # Set font properties for the rest of the document
         run.font.name = 'Arial'
-        run.font.size = Pt(9)
+        run.font.size = Pt(10)
 
         # Check for "ASSESSMENT:" and "PLAN:" to apply bold and underline
         if section.startswith("ASSESSMENT:"):
@@ -63,9 +107,19 @@ if 'paragraph_text' not in st.session_state:
 
 st.session_state.paragraph_text = st.text_area("Enter the text for the note you want to update:", value=st.session_state.paragraph_text)
 
-options = ["Continue", "Will continue", "We will continue", "We shall continue"]
+# Define GitHub URL for your repository (replace with your actual URL)
+github_repo_url = "https://api.github.com/repos/your-username/your-repo"
 
-# Columns for the selectboxes
+# Fetch available ROS and Physical Exam files from GitHub
+ros_files = get_github_files(github_repo_url, "conkraw/s_char/ros")
+physical_exam_files = get_github_files(github_repo_url, "conkraw/s_char/physicalexam")
+
+# Dropdowns for selecting ROS and Physical Exam files
+ros_selection = st.selectbox("Select ROS file:", ros_files)
+physical_exam_selection = st.selectbox("Select Physical Exam file:", physical_exam_files)
+
+# Allow the user to input their text for replacement
+options = ["Continue", "Will continue", "We will continue", "We shall continue"]
 col1, col2 = st.columns(2)
 
 with col1:
@@ -74,11 +128,20 @@ with col1:
 with col2:
     replacement = st.selectbox("Select a replacement phrase:", options)
 
+# Construct the URLs for the selected files
+ros_url = f"https://raw.githubusercontent.com/your-username/your-repo/main/conkraw/s_char/ros/{ros_selection}"
+physical_exam_url = f"https://raw.githubusercontent.com/your-username/your-repo/main/conkraw/s_char/physicalexam/{physical_exam_selection}"
+
+ros_text = read_docx_from_url(ros_url)  # Fetch the content of ROS file
+physical_exam_text = read_docx_from_url(physical_exam_url)  # Fetch the content of Physical Exam file
+
 if st.button("Replace"):
     if st.session_state.paragraph_text:
         # Perform replacement
         updated_text = st.session_state.paragraph_text.replace(selected_option, replacement)
-        word_file = create_word_doc(updated_text)
+        
+        # Create the Word document
+        word_file = create_word_doc(updated_text, ros_text, physical_exam_text)
         
         # Ensure room input is valid for filename
         if room_input:

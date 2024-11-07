@@ -236,3 +236,5 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     doc.save(output_path)
     return output_path
 
+#
+

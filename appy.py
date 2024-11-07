@@ -13,20 +13,40 @@ def format_diagnosis_name(diagnosis):
     return formatted_name
 
 # Function to create a Word document with specific font settings and single spacing
+# Function to create a Word document with specific font settings and single spacing
 def create_word_doc(text):
     doc = Document()
     
     for line in text.split('\n'):
         p = doc.add_paragraph()
-        run = p.add_run(line)
-        run.font.name = 'Arial'
-        run.font.size = Pt(9)
+
+        # Check if the word "OBJECTIVE:" is in the line
+        if "OBJECTIVE:" in line:
+            # First, add the bold and underlined "OBJECTIVE:"
+            objective_run = p.add_run("OBJECTIVE:")
+            objective_run.bold = True
+            objective_run.underline = True
+            objective_run.font.name = 'Arial'
+            objective_run.font.size = Pt(9)
+            
+            # Now, add the remaining part of the line after "OBJECTIVE:" without bold/underline
+            remaining_text = line.replace("OBJECTIVE:", "").strip()
+            if remaining_text:
+                p.add_run(f" {remaining_text}").font.name = 'Arial'
+                p.add_run(f" {remaining_text}").font.size = Pt(9)
+        else:
+            # For normal lines without "OBJECTIVE:", apply standard formatting
+            run = p.add_run(line)
+            run.font.name = 'Arial'
+            run.font.size = Pt(9)
+
         p.paragraph_format.space_after = Pt(0)
         p.paragraph_format.space_before = Pt(0)
 
     output_path = "updated_note.docx"
     doc.save(output_path)
     return output_path
+
 
 # Function to fetch the raw content of a Word document directly from GitHub (via raw URL)
 def read_github_doc(github_url):

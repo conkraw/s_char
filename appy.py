@@ -28,19 +28,28 @@ def create_word_doc(text):
     doc.save(output_path)
     return output_path
 
-# Function to fetch list of .docx files from GitHub repository
+# Function to fetch list of .docx files from GitHub repository with improved error handling
 def get_github_docs_list(github_repo, folder_path):
     # GitHub API URL for listing files in a directory
     url = f"https://api.github.com/repos/{github_repo}/contents/{folder_path}"
     response = requests.get(url)
     
+    # Check for rate limit or failed request
+    if response.status_code == 403:  # Forbidden, possibly rate-limited
+        rate_limit = response.headers.get('X-RateLimit-Remaining', 'Unknown')
+        st.error(f"GitHub API Rate Limit Exceeded. Remaining Requests: {rate_limit}")
+        st.error(f"Response: {response.text}")
+        return []
+
     if response.status_code == 200:
         files = response.json()
         # Filter out only the .docx files from the folder
         doc_files = [file['name'] for file in files if file['name'].endswith('.docx')]
         return doc_files
     else:
-        st.error("Failed to fetch files from GitHub repository.")
+        # Print out the error message and status code for debugging
+        st.error(f"Failed to fetch files from GitHub repository. Status Code: {response.status_code}")
+        st.error(f"Response: {response.text}")
         return []
 
 # Function to read and parse a Word document from a raw GitHub URL
@@ -58,7 +67,8 @@ def read_github_doc(github_url):
         os.remove("temp_document.docx")  # Clean up the temporary file
         return document_text
     else:
-        st.error("Error downloading the document.")
+        st.error(f"Error downloading the document from GitHub. Status Code: {response.status_code}")
+        st.error(f"Response: {response.text}")
         return None
 
 # Function to combine diagnosis documents with formatted input text
@@ -101,8 +111,8 @@ def combine_notes(physical_exam_text, assess_text, diagnoses, free_text_diag=Non
 
     # Add selected diagnoses (from the list)
     for i, diagnosis in enumerate(diagnoses, start=1):
-        diagnosis_key = diagnosis_mapping.get(diagnosis)  # Get the original file name
-        if diagnosis_key and os.path.exists(diagnosis_key):
+        diagnosis_key = diagnosis.lower().replace(' ', '_') + '.docx'
+        if os.path.exists(diagnosis_key):
             diagnosis_paragraph = doc.add_paragraph()
             diagnosis_run = diagnosis_paragraph.add_run(f"{i}). {diagnosis}")
             diagnosis_run.font.size = Pt(9)
@@ -146,18 +156,17 @@ folder_path = "physicalexam"  # Folder in your GitHub repo containing the exam d
 # Fetch the list of available documents from GitHub
 available_exam_docs = get_github_docs_list(github_repo, folder_path)
 
-# Check if there are available exam documents
-if not available_exam_docs:
-    st.warning("No exam documents found in the specified folder.")
-else:
-    # Allow user to select a physical exam document from the available list
+# Allow user to select a physical exam document from the available list
+if available_exam_docs:
     selected_exam = st.selectbox("Select a Physical Exam Document:", available_exam_docs)
+else:
+    st.warning("No exam documents found in the specified folder.")
 
-    # Fetch the content of the selected physical exam document
-    physical_exam_text = None
-    if selected_exam:
-        github_url = f"https://raw.githubusercontent.com/{github_repo}/main/{folder_path}/{selected_exam}"
-        physical_exam_text = read_github_doc(github_url)
+# Fetch the content of the selected physical exam document
+physical_exam_text = None
+if selected_exam:
+    github_url = f"https://raw.githubusercontent.com/{github_repo}/main/{folder_path}/{selected_exam}"
+    physical_exam_text = read_github_doc(github_url)
 
 # Dynamically list available diagnosis documents in the current directory
 available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx') and f != selected_exam]  # Exclude selected exam doc
@@ -169,24 +178,17 @@ sorted_conditions = sorted(formatted_conditions)
 # Create a mapping for formatted names to original filenames
 diagnosis_mapping = {format_diagnosis_name(doc): doc for doc in available_docs}
 
-# Allow user to select diagnoses
 selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
 
 # Input for assessment
 assessment_text = st.text_area("Enter Assessment:")
 
-# Handle form submission
 if st.button("Submit New Note"):
-    if not room_number:
-        st.error("Room number is required.")
-    elif not selected_conditions:
-        st.error("Please select at least one diagnosis.")
-    elif not assessment_text:
-        st.error("Assessment text is required.")
-    elif not physical_exam_text:
-        st.error("Physical exam text is required.")
-    else:
+    if selected_conditions and assessment_text and room_number:
         combined_file = combine_notes(physical_exam_text, assessment_text, selected_conditions)  # Add free_text_diag, free_text_plan if needed
         file_name = f"{room_number}.docx"
         with open(combined_file, "rb") as f:
             st.download_button("Download Combined Note", f, file_name=file_name)
+    else:
+        st.error("Please fill out all fields.")
+

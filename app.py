@@ -111,7 +111,7 @@ st.session_state.paragraph_text = st.text_area("Enter the text for the note you 
 
 # GitHub Repo URL and authentication headers
 github_repo_url = "https://api.github.com/repos/conkraw/s_char"
-github_token = st.text_input("Enter your GitHub Personal Access Token (optional, for increased rate limit):")
+#github_token = st.text_input("Enter your GitHub Personal Access Token (optional, for increased rate limit):")
 headers = {"Authorization": f"token {github_token}"} if github_token else {}
 
 # Fetch available ROS and Physical Exam files from GitHub using ThreadPoolExecutor for concurrent fetching

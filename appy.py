@@ -78,7 +78,7 @@ def create_word_doc(text):
     return output_path
 
 # Function to combine all sections into a single note
-def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=None, free_text_plan=None, physical_exam_day=None, ros_file=None):
+def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=None, free_text_plan=None, physical_exam_day=None, ros_file=None, critical_care_time=None):
     doc = Document()
 
     # Add the introductory statement at the top (italicized, Arial, font size 9)
@@ -92,9 +92,17 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     intro_paragraph.paragraph_format.space_after = Pt(0)
     intro_paragraph.paragraph_format.space_before = Pt(0)
 
+    last_paragraph = doc.add_paragraph()  # Add an empty paragraph
+    last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
+
     # Add Review of Systems section first (if ROS file is selected)
     if ros_file:
         ros_paragraph = doc.add_paragraph()
+        ros_run = ros_paragraph.add_run("REVIEW OF SYSTEMS:")
+        ros_run.bold = True
+        ros_run.underline = True
+        ros_run.font.name = 'Arial'
+        ros_run.font.size = Pt(9)
         ros_paragraph.paragraph_format.space_after = Pt(0)
         ros_paragraph.paragraph_format.space_before = Pt(0)
         
@@ -105,46 +113,11 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         if ros_doc:
             for para in ros_doc.paragraphs:
                 new_paragraph = doc.add_paragraph()
-                
-                # Split the paragraph text by the target phrases and apply formatting to those specific phrases
-                text = para.text
-                text_chunks = []
-                
-                # Check and split for "OVERNIGHT EVENTS"
-                if "OVERNIGHT EVENTS" in text:
-                    text_chunks.extend(text.split("OVERNIGHT EVENTS"))
-                    text_chunks.insert(1, "OVERNIGHT EVENTS")
-                else:
-                    text_chunks.append(text)
-
-                # Now handle applying bold/underline to "OVERNIGHT EVENTS" and "SUBJECTIVE"
-                formatted_text = []
-                for chunk in text_chunks:
-                    if chunk == "OVERNIGHT EVENTS":
-                        # Apply bold and underline only to "OVERNIGHT EVENTS"
-                        run = new_paragraph.add_run(chunk)
-                        run.bold = True
-                        run.underline = True
-                    elif "SUBJECTIVE" in chunk:
-                        # Apply bold and underline to "SUBJECTIVE"
-                        run = new_paragraph.add_run(chunk)
-                        run.bold = True
-                        run.underline = True
-                    else:
-                        # For normal text, just add as-is
-                        run = new_paragraph.add_run(chunk)
-                    run.font.name = 'Arial'
-                    run.font.size = Pt(9)
-                
-                new_paragraph.paragraph_format.space_after = Pt(0)
-                new_paragraph.paragraph_format.space_before = Pt(0)
+                new_paragraph.add_run(para.text).font.name = 'Arial'
+                new_paragraph.add_run(para.text).font.size = Pt(9)
 
             last_paragraph = doc.add_paragraph()  # Add an empty paragraph
             last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
-            
-            for run in last_paragraph.runs:
-                run.font.name = 'Arial'
-                run.font.size = Pt(9)
 
     # Add Objective section if a physical exam day is selected
     if physical_exam_day:
@@ -169,13 +142,9 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
                 for run in new_paragraph.runs:
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
-            
+
             last_paragraph = doc.add_paragraph()  # Add an empty paragraph
             last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
-            
-            for run in last_paragraph.runs:
-                run.font.name = 'Arial'
-                run.font.size = Pt(9)
 
     # Add Assessment section
     assessment_paragraph = doc.add_paragraph()
@@ -237,17 +206,24 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
                 for run in new_paragraph.runs:
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
-            
+    
     # Append free-text diagnosis and plan if provided
     if free_text_diag and free_text_plan:
         doc.add_paragraph()  # Add a blank line
         doc.add_paragraph(f"Free Text Diagnosis: {free_text_diag}")
         doc.add_paragraph(f"Plan: {free_text_plan}")
 
+    # Append critical care time to the plan if entered
+    if critical_care_time:
+        plan_paragraph = doc.add_paragraph()
+        plan_run = plan_paragraph.add_run(f"Critical Care Time: {critical_care_time}")
+        plan_run.bold = True
+        plan_run.font.name = 'Arial'
+        plan_run.font.size = Pt(9)
+
     output_path = "combined_note.docx"
     doc.save(output_path)
     return output_path
-
 
 # Title of the app
 st.title("Note Management App")
@@ -284,6 +260,7 @@ else:
 # Select diagnoses
 selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
 
+# Assessment and Critical Care selections
 assessment_text = st.text_area("Enter Assessment:")
 
 critical_care_options = [
@@ -296,9 +273,19 @@ critical_care_options = [
     
 selected_critical_care = st.selectbox("Why Critical Care:", critical_care_options)
 
+# New Critical Care Time input (bolded)
+critical_care_time = st.text_input("Enter Critical Care Time (optional):")
+
 if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:
-        combined_file = combine_notes(assessment_text, selected_critical_care, selected_conditions, physical_exam_day=selected_exam_day, ros_file=selected_ros_file)
+        combined_file = combine_notes(
+            assessment_text,
+            selected_critical_care,
+            selected_conditions,
+            physical_exam_day=selected_exam_day,
+            ros_file=selected_ros_file,
+            critical_care_time=critical_care_time
+        )
         file_name = f"{room_number}.docx"
         with open(combined_file, "rb") as f:
             st.download_button("Download Combined Note", f, file_name=file_name)

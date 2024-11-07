@@ -20,9 +20,9 @@ def create_word_doc(text):
         p = doc.add_paragraph()
         
         # Check if the line is exactly "OBJECTIVE:" (on its own line)
-        if line.strip() == "OBJECTIVE: ":
+        if line.strip() == "OBJECTIVE:":
             # If it's the "OBJECTIVE:" line, apply bold and underline
-            objective_run = p.add_run("OBJECTIVE: ")
+            objective_run = p.add_run("OBJECTIVE:")
             objective_run.bold = True
             objective_run.underline = True
             objective_run.font.name = 'Arial'

@@ -176,7 +176,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         if physical_exam_doc:
             for para in physical_exam_doc.paragraphs:
                 new_paragraph = doc.add_paragraph(para.text)
-                new_paragraph.paragraph_format.space_after = Pt(0)
+                new_paragraph.paragraph_format.space_after = Pt(6)
                 new_paragraph.paragraph_format.space_before = Pt(0)
                 for run in new_paragraph.runs:
                     run.font.name = 'Arial'

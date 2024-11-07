@@ -335,7 +335,7 @@ ros_selection = st.selectbox("Select ROS file:", list(ros_files.keys()))
 
 #sorted_physical_exam_options = sorted(physical_exam_files.keys(), key=lambda x: (x.split()[0], int(x.split()[2])))
 
-physical_exam_selection = st.selectbox("Select Physical Exam file:", list(physical_exam_days.keys()))
+#physical_exam_selection = st.selectbox("Select Physical Exam file:", list(physical_exam_days.keys()))
 
 # Dynamically list available diagnosis documents in the current directory
 available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]

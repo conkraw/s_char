@@ -5,12 +5,61 @@ import os
 import re
 import requests
 
-# Function to fetch and format diagnosis names
+# Function to format diagnosis names
 def format_diagnosis_name(diagnosis):
     diagnosis = diagnosis.replace('_', ' ')
     formatted_name = re.sub(r'(?<!^)(?=[A-Z])', ' ', diagnosis)
     formatted_name = formatted_name.title()
     return formatted_name
+
+# Function to fetch files from GitHub repository
+def fetch_files_from_github(folder_name):
+    url = f"https://api.github.com/repos/conkraw/s_char/contents/{folder_name}"
+    files = []
+    
+    try:
+        # Send GET request to GitHub API to fetch contents of the folder
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            # Parse the response JSON
+            response_files = response.json()
+            for file in response_files:
+                # Filter out only .docx files
+                if file['name'].endswith('.docx'):
+                    files.append(file['name'])
+        else:
+            st.error(f"Failed to fetch files: Status code {response.status_code}")
+            st.write(response.text)  # Display the response content for debugging
+    except requests.exceptions.RequestException as e:
+        st.error(f"An error occurred while fetching files: {e}")
+        st.write(str(e))  # Display the exception details for debugging
+    
+    return files
+
+# Function to download and extract content from a document
+def fetch_file_content(folder_name, file_name):
+    url = f"https://raw.githubusercontent.com/conkraw/s_char/master/{folder_name}/{file_name}"
+    try:
+        # Download the document as raw content
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            # Save the content as a .docx file locally
+            with open(file_name, "wb") as f:
+                f.write(response.content)
+            
+            # Now read the content from the local file
+            doc = Document(file_name)
+            content = "\n".join([para.text for para in doc.paragraphs])
+            os.remove(file_name)  # Remove the local file after reading content
+            return doc  # Return the Document object, not just plain text
+        else:
+            st.error(f"Failed to fetch content: Status code {response.status_code}")
+            return None
+    except requests.exceptions.RequestException as e:
+        st.error(f"An error occurred while fetching content: {e}")
+        return None
 
 # Function to create a Word document with specific font settings and single spacing
 def create_word_doc(text):
@@ -28,8 +77,8 @@ def create_word_doc(text):
     doc.save(output_path)
     return output_path
 
-# Function to combine all sections into a single note
-def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=None, free_text_plan=None, physical_exam_day=None, ros_file=None):
+# Function to combine diagnosis documents with formatted input text
+def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=None, physical_exam_day=None, ros_file=None):
     doc = Document()
 
     # Add the introductory statement at the top (italicized, Arial, font size 9)
@@ -63,40 +112,12 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         # Add the fetched content under the REVIEW OF SYSTEMS section
         if ros_doc:
             for para in ros_doc.paragraphs:
-                new_paragraph = doc.add_paragraph()
-                
-                # Split the paragraph text by the target phrases and apply formatting to those specific phrases
-                text = para.text
-                text_chunks = []
-                
-                # Check and split for "OVERNIGHT EVENTS"
-                if "OVERNIGHT EVENTS" in text:
-                    text_chunks.extend(text.split("OVERNIGHT EVENTS"))
-                    text_chunks.insert(1, "OVERNIGHT EVENTS")
-                else:
-                    text_chunks.append(text)
-
-                # Now handle applying bold/underline to "OVERNIGHT EVENTS" and "SUBJECTIVE"
-                formatted_text = []
-                for chunk in text_chunks:
-                    if chunk == "OVERNIGHT EVENTS":
-                        # Apply bold and underline only to "OVERNIGHT EVENTS"
-                        run = new_paragraph.add_run(chunk)
-                        run.bold = True
-                        run.underline = True
-                    elif "SUBJECTIVE" in chunk:
-                        # Apply bold and underline to "SUBJECTIVE"
-                        run = new_paragraph.add_run(chunk)
-                        run.bold = True
-                        run.underline = True
-                    else:
-                        # For normal text, just add as-is
-                        run = new_paragraph.add_run(chunk)
-                    run.font.name = 'Arial'
-                    run.font.size = Pt(9)
-                
+                new_paragraph = doc.add_paragraph(para.text)
                 new_paragraph.paragraph_format.space_after = Pt(0)
                 new_paragraph.paragraph_format.space_before = Pt(0)
+                for run in new_paragraph.runs:
+                    run.font.name = 'Arial'
+                    run.font.size = Pt(9)
 
             last_paragraph = doc.add_paragraph()  # Add an empty paragraph
             last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
@@ -192,4 +213,49 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     doc.save(output_path)
     return output_path
 
+# Title of the app
+st.title("Note Management App")
+
+# Header for the New Note section
+st.header("Create a New Note")
+
+# Input for room number
+room_number = st.text_input("Enter Room Number:")
+
+# Fetch both the diagnoses and physical exam days from GitHub
+physical_exam_days = fetch_files_from_github('physicalexam')
+ros_files = fetch_files_from_github('ros')
+
+# Dynamically list available diagnosis documents in the current directory
+available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]
+formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
+
+# Sort the formatted conditions alphabetically
+sorted_conditions = sorted(formatted_conditions)
+
+# Add the selection input for physical exam day
+if physical_exam_days:
+    selected_exam_day = st.selectbox("Select Physical Examination Day:", physical_exam_days)
+else:
+    selected_exam_day = None
+
+# Add the selection input for ROS file
+if ros_files:
+    selected_ros_file = st.selectbox("Select Review of Systems File:", ros_files)
+else:
+    selected_ros_file = None
+
+# Select diagnoses
+selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
+
+assessment_text = st.text_area("Enter Assessment:")
+
+if st.button("Submit New Note"):
+    if selected_conditions and assessment_text and room_number:
+        combined_file = combine_notes(assessment_text, selected_conditions, physical_exam_day=selected_exam_day, ros_file=selected_ros_file)
+        file_name = f"{room_number}.docx"
+        with open(combined_file, "rb") as f:
+            st.download_button("Download Combined Note", f, file_name=file_name)
+    else:
+        st.error("Please fill out all fields.")
 

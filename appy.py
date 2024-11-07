@@ -13,52 +13,52 @@ def format_diagnosis_name(diagnosis):
     return formatted_name
 
 # Function to fetch physical exam day files from GitHub repository
-def fetch_physical_exam_days():
-    url = "https://api.github.com/repos/conkraw/s_char/contents/physicalexam"
-    physical_exam_days = []
+def fetch_files_from_github(folder_name):
+    url = f"https://api.github.com/repos/conkraw/s_char/contents/{folder_name}"
+    files = []
     
     try:
-        # Send GET request to GitHub API to fetch contents of the 'physicalexam' folder
+        # Send GET request to GitHub API to fetch contents of the folder
         response = requests.get(url)
         
         if response.status_code == 200:
             # Parse the response JSON
-            files = response.json()
-            for file in files:
-                # Filter out only .docx files (assuming they are the physical exam day files)
+            response_files = response.json()
+            for file in response_files:
+                # Filter out only .docx files
                 if file['name'].endswith('.docx'):
-                    physical_exam_days.append(file['name'])
+                    files.append(file['name'])
         else:
-            st.error(f"Failed to fetch physical exam days: Status code {response.status_code}")
+            st.error(f"Failed to fetch files: Status code {response.status_code}")
             st.write(response.text)  # Display the response content for debugging
     except requests.exceptions.RequestException as e:
-        st.error(f"An error occurred while fetching physical exam days: {e}")
+        st.error(f"An error occurred while fetching files: {e}")
         st.write(str(e))  # Display the exception details for debugging
     
-    return physical_exam_days
+    return files
 
-# Function to download and extract content from a physical exam day document
-def fetch_physical_exam_content(exam_file_name):
-    url = f"https://raw.githubusercontent.com/conkraw/s_char/master/physicalexam/{exam_file_name}"
+# Function to download and extract content from a document
+def fetch_file_content(folder_name, file_name):
+    url = f"https://raw.githubusercontent.com/conkraw/s_char/master/{folder_name}/{file_name}"
     try:
-        # Download the physical exam document as raw content
+        # Download the document as raw content
         response = requests.get(url)
         
         if response.status_code == 200:
             # Save the content as a .docx file locally
-            with open(exam_file_name, "wb") as f:
+            with open(file_name, "wb") as f:
                 f.write(response.content)
             
             # Now read the content from the local file
-            exam_doc = Document(exam_file_name)
-            content = "\n".join([para.text for para in exam_doc.paragraphs])
-            os.remove(exam_file_name)  # Remove the local file after reading content
-            return exam_doc  # Return the Document object, not just plain text
+            doc = Document(file_name)
+            content = "\n".join([para.text for para in doc.paragraphs])
+            os.remove(file_name)  # Remove the local file after reading content
+            return doc  # Return the Document object, not just plain text
         else:
-            st.error(f"Failed to fetch physical exam content: Status code {response.status_code}")
+            st.error(f"Failed to fetch content: Status code {response.status_code}")
             return None
     except requests.exceptions.RequestException as e:
-        st.error(f"An error occurred while fetching physical exam content: {e}")
+        st.error(f"An error occurred while fetching content: {e}")
         return None
 
 # Function to create a Word document with specific font settings and single spacing
@@ -78,7 +78,7 @@ def create_word_doc(text):
     return output_path
 
 # Function to combine diagnosis documents with formatted input text
-def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=None, physical_exam_day=None):
+def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=None, physical_exam_day=None, ros_file=None):
     doc = Document()
 
     # Add the introductory statement at the top (italicized, Arial, font size 9)
@@ -107,26 +107,52 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
         objective_paragraph.paragraph_format.space_before = Pt(0)
         
         # Fetch the content of the selected physical exam day
-        physical_exam_doc = fetch_physical_exam_content(physical_exam_day)
+        physical_exam_doc = fetch_file_content('physicalexam', physical_exam_day)
         
         # Add the fetched content under the OBJECTIVE section
         if physical_exam_doc:
-            # Loop through each paragraph in the physical exam document and format it
             for para in physical_exam_doc.paragraphs:
                 new_paragraph = doc.add_paragraph(para.text)
                 new_paragraph.paragraph_format.space_after = Pt(0)
                 new_paragraph.paragraph_format.space_before = Pt(0)
-                
-                # Apply the font size and style to each run in the paragraph
                 for run in new_paragraph.runs:
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
             
-            # Add a small amount of space after the physical exam content (1 single line)
             last_paragraph = doc.add_paragraph()  # Add an empty paragraph
             last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
             
-            # Ensure the empty paragraph is also in Arial, size 9 (to maintain consistent formatting)
+            for run in last_paragraph.runs:
+                run.font.name = 'Arial'
+                run.font.size = Pt(9)
+
+    # Add ROS section if an ROS file is selected
+    if ros_file:
+        ros_paragraph = doc.add_paragraph()
+        ros_run = ros_paragraph.add_run("SUBJECTIVE:")
+        ros_run.bold = True
+        ros_run.underline = True
+        ros_run.font.name = 'Arial'
+        ros_run.font.size = Pt(9)
+        ros_paragraph.paragraph_format.space_after = Pt(0)
+        ros_paragraph.paragraph_format.space_before = Pt(0)
+        
+        # Fetch the content of the selected ROS file
+        ros_doc = fetch_file_content('ros', ros_file)
+        
+        # Add the fetched content under the REVIEW OF SYSTEMS section
+        if ros_doc:
+            for para in ros_doc.paragraphs:
+                new_paragraph = doc.add_paragraph(para.text)
+                new_paragraph.paragraph_format.space_after = Pt(0)
+                new_paragraph.paragraph_format.space_before = Pt(0)
+                for run in new_paragraph.runs:
+                    run.font.name = 'Arial'
+                    run.font.size = Pt(9)
+
+            last_paragraph = doc.add_paragraph()  # Add an empty paragraph
+            last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
+            
             for run in last_paragraph.runs:
                 run.font.name = 'Arial'
                 run.font.size = Pt(9)
@@ -171,7 +197,7 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
             for para in diagnosis_doc.paragraphs:
                 new_paragraph = doc.add_paragraph(para.text)
                 new_paragraph.paragraph_format.space_before = Pt(0)
-                new_paragraph.paragraph_format.space_after = Pt(0)  # No space after diagnosis content
+                new_paragraph.paragraph_format.space_after = Pt(0)
                 
                 for run in new_paragraph.runs:
                     run.font.name = 'Arial'
@@ -197,7 +223,8 @@ st.header("Create a New Note")
 room_number = st.text_input("Enter Room Number:")
 
 # Fetch both the diagnoses and physical exam days from GitHub
-physical_exam_days = fetch_physical_exam_days()
+physical_exam_days = fetch_files_from_github('physicalexam')
+ros_files = fetch_files_from_github('ros')
 
 # Dynamically list available diagnosis documents in the current directory
 available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]
@@ -211,14 +238,21 @@ if physical_exam_days:
     selected_exam_day = st.selectbox("Select Physical Examination Day:", physical_exam_days)
 else:
     selected_exam_day = None
-    
+
+# Add the selection input for ROS file
+if ros_files:
+    selected_ros_file = st.selectbox("Select Review of Systems File:", ros_files)
+else:
+    selected_ros_file = None
+
+# Select diagnoses
 selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
 
 assessment_text = st.text_area("Enter Assessment:")
 
 if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:
-        combined_file = combine_notes(assessment_text, selected_conditions, physical_exam_day=selected_exam_day)
+        combined_file = combine_notes(assessment_text, selected_conditions, physical_exam_day=selected_exam_day, ros_file=selected_ros_file)
         file_name = f"{room_number}.docx"
         with open(combined_file, "rb") as f:
             st.download_button("Download Combined Note", f, file_name=file_name)

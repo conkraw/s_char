@@ -129,8 +129,8 @@ with col2:
     replacement = st.selectbox("Select a replacement phrase:", options)
 
 # Construct the URLs for the selected files
-ros_url = f"https://raw.githubusercontent.com/your-username/your-repo/main/conkraw/s_char/ros/{ros_selection}"
-physical_exam_url = f"https://raw.githubusercontent.com/your-username/your-repo/main/conkraw/s_char/physicalexam/{physical_exam_selection}"
+ros_url = f"https://raw.githubusercontent.com/conkraw/s_char/main/ros/{ros_selection}"
+physical_exam_url = f"https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/{physical_exam_selection}"
 
 ros_text = read_docx_from_url(ros_url)  # Fetch the content of ROS file
 physical_exam_text = read_docx_from_url(physical_exam_url)  # Fetch the content of Physical Exam file

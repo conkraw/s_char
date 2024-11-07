@@ -116,7 +116,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     overnight_paragraph.paragraph_format.space_after = Pt(6)
     overnight_paragraph.paragraph_format.space_before = Pt(6)
     
-    # Add "SUBJECTIVE" header and ROS content
+    # Fetch and add the ROS content under the SUBJECTIVE section
     if ros_file != "None" and ros_file in ros_files:
         ros_paragraph = doc.add_paragraph()
         
@@ -126,7 +126,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         ros_run.underline = True
         ros_run.font.name = 'Arial'
         ros_run.font.size = Pt(9)
-    
+        
         ros_paragraph.paragraph_format.space_after = Pt(0)
         ros_paragraph.paragraph_format.space_before = Pt(0)
         
@@ -138,10 +138,12 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         if ros_content:
             # Add the ROS content to the document as paragraphs
             for line in ros_content.split("\n"):
-                ros_paragraph = doc.add_paragraph(line)
-                ros_paragraph.font.name = 'Arial'
-                ros_paragraph.font.size = Pt(9)
-    
+                # Add each line as a Run object inside the paragraph
+                ros_run = ros_paragraph.add_run(line)
+                ros_run.font.name = 'Arial'
+                ros_run.font.size = Pt(9)
+                ros_paragraph.add_run("\n")  # Ensure each line is on a new line
+        
     # Add Objective section if a physical exam day is selected
     if pe_selection != "None" and pe_selection in physical_exam_days:
         objective_paragraph = doc.add_paragraph()
@@ -161,9 +163,11 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         if physical_exam_content:
             # Add the fetched content under the OBJECTIVE section
             for line in physical_exam_content.split("\n"):
-                objective_paragraph = doc.add_paragraph(line)
-                objective_paragraph.font.name = 'Arial'
-                objective_paragraph.font.size = Pt(9)
+                # Add each line as a Run object inside the paragraph
+                objective_run = objective_paragraph.add_run(line)
+                objective_run.font.name = 'Arial'
+                objective_run.font.size = Pt(9)
+                objective_paragraph.add_run("\n")  # Ensure each line is on a new line
 
     # Add the Assessment section
     assessment_paragraph = doc.add_paragraph()

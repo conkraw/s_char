@@ -108,7 +108,9 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
             
-            #doc.add_paragraph()
+            # Add a small amount of space after the physical exam content (1 single line)
+            last_paragraph = doc.add_paragraph()  # Add an empty paragraph
+            last_paragraph.paragraph_format.space_after = Pt(6)  # Set space after to a small value (6 pt)
     
     # Add Assessment section
     assessment_paragraph = doc.add_paragraph()
@@ -185,15 +187,15 @@ formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
 # Sort the formatted conditions alphabetically
 sorted_conditions = sorted(formatted_conditions)
 
+selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
+
+assessment_text = st.text_area("Enter Assessment:")
+
 # Add the selection input for physical exam day
 if physical_exam_days:
     selected_exam_day = st.selectbox("Select Physical Examination Day:", physical_exam_days)
 else:
     selected_exam_day = None
-    
-selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
-
-assessment_text = st.text_area("Enter Assessment:")
 
 if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:
@@ -203,4 +205,5 @@ if st.button("Submit New Note"):
             st.download_button("Download Combined Note", f, file_name=file_name)
     else:
         st.error("Please fill out all fields.")
+
 

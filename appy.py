@@ -77,7 +77,6 @@ def create_word_doc(text):
     doc.save(output_path)
     return output_path
 
-# Function to combine diagnosis documents with formatted input text
 def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=None, physical_exam_day=None, ros_file=None):
     doc = Document()
 
@@ -112,27 +111,32 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
         # Add the fetched content under the REVIEW OF SYSTEMS section
         if ros_doc:
             for para in ros_doc.paragraphs:
-                new_paragraph = doc.add_paragraph(para.text)
+                new_paragraph = doc.add_paragraph()
+                
+                # Check and apply bold/underline only to specific phrases
+                text = para.text
+                if "OVERNIGHT EVENTS" in text:
+                    text = text.replace("OVERNIGHT EVENTS", "**OVERNIGHT EVENTS**")  # Add special markers
+                if "SUBJECTIVE" in text:
+                    text = text.replace("SUBJECTIVE", "**SUBJECTIVE**")  # Add special markers
+                
+                # Add the modified text to the paragraph
+                new_run = new_paragraph.add_run(text)
                 new_paragraph.paragraph_format.space_after = Pt(0)
                 new_paragraph.paragraph_format.space_before = Pt(0)
 
-                # Apply bold and underline to specific text
-                if "OVERNIGHT EVENTS:" in para.text:
-                    for run in new_paragraph.runs:
-                        if "OVERNIGHT EVENTS:" in run.text:
-                            run.bold = True
-                            run.underline = True
-
-                if "SUBJECTIVE:" in para.text:
-                    for run in new_paragraph.runs:
-                        if "SUBJECTIVE:" in run.text:
-                            run.bold = True
-                            run.underline = True
-                
-                # Apply font styling to all runs in the paragraph
+                # Now we go through the runs and specifically apply bold and underline to the special markers
                 for run in new_paragraph.runs:
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
+                    
+                    # Apply bold and underline to **OVERNIGHT EVENTS** and **SUBJECTIVE**
+                    if "OVERNIGHT EVENTS" in run.text:
+                        run.bold = True
+                        run.underline = True
+                    if "SUBJECTIVE" in run.text:
+                        run.bold = True
+                        run.underline = True
 
             last_paragraph = doc.add_paragraph()  # Add an empty paragraph
             last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
@@ -227,6 +231,7 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
     output_path = "combined_note.docx"
     doc.save(output_path)
     return output_path
+
 
 # Title of the app
 st.title("Note Management App")

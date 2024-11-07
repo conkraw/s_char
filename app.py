@@ -95,19 +95,10 @@ def create_word_doc(text, ros_text, physical_exam_text):
         if section.startswith("ASSESSMENT:"):
             run.bold = True
             run.underline = True
-        elif section.startswith("PLAN:"):
-            run.bold = True
-            run.underline = True
-        elif section.startswith("SUBJECTIVE:"):
-            run.bold = True
-            run.underline = True
-        elif section.startswith("OBJECTIVE:"):
-            run.bold = True
-            run.underline = True
-        elif section.startswith("OVERNIGHT EVENTS:"):
-            run.bold = True
-            run.underline = True
         elif section.startswith("CLINICAL INDICATIONS FOR CRITICAL CARE SERVICES:"):
+            run.bold = True
+            run.underline = True
+        elif section.startswith("PLAN:"):
             run.bold = True
             run.underline = True
             

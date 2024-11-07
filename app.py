@@ -35,9 +35,18 @@ def create_word_doc(text, ros_text, physical_exam_text):
     # Add ROS if selected
     if ros_text:
         ros_paragraph = doc.add_paragraph()
-        ros_run = ros_paragraph.add_run(ros_text)
+        
+        # Add ROS heading (e.g., "SUBJECTIVE:")
+        ros_run = ros_paragraph.add_run("SUBJECTIVE: ")
+        ros_run.bold = True
+        ros_run.underline = True
         ros_run.font.name = 'Arial'
         ros_run.font.size = Pt(9)
+
+        # Add the content of the ROS text
+        ros_content_run = ros_paragraph.add_run("\n" + ros_text)
+        ros_content_run.font.name = 'Arial'
+        ros_content_run.font.size = Pt(9)
 
     # Now we handle the "OBJECTIVE:" section and the rest of the physical exam content
     physical_exam_lines = physical_exam_text.split("\n")

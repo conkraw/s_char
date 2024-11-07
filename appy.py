@@ -151,31 +151,6 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         run.font.name = 'Arial'
         run.font.size = Pt(9)
 
-    # Add the "Why Critical Care" dropdown selection after assessment
-    critical_care_paragraph = doc.add_paragraph()
-    critical_care_run = critical_care_paragraph.add_run("WHY CRITICAL CARE:")
-    critical_care_run.bold = True
-    critical_care_run.underline = True
-    critical_care_run.font.name = 'Arial'
-    critical_care_run.font.size = Pt(9)
-    critical_care_paragraph.paragraph_format.space_after = Pt(0)
-    critical_care_paragraph.paragraph_format.space_before = Pt(0)
-
-    critical_care_options = [
-        "The patient requires critical care services due to the continuous management of invasive respiratory as well as hemodynamic support, which if not provided, would be life threatening to the patient.",
-        "The patient requires critical care services due to the high risk of neurologic decompensation which could result in airway loss and respiratory failure, which is life threatening to the patient.",
-        "The patient requires critical care services for management of the patient's airway and invasive mechanical respiratory support without which would be life threatening to the patient.",
-        "The patient requires critical care services for management of the patient's airway and non-invasive mechanical respiratory support without which would be life threatening to the patient.",
-        "The patient requires critical care services as the patient is at high risk of withdrawal, and thus requires intensive care monitoring."
-    ]
-    
-    selected_critical_care = st.selectbox("Why Critical Care:", critical_care_options)
-    
-    critical_care_content = doc.add_paragraph(selected_critical_care)
-    for run in critical_care_content.runs:
-        run.font.name = 'Arial'
-        run.font.size = Pt(9)
-
     # Plan section
     plan_paragraph = doc.add_paragraph()
     plan_run = plan_paragraph.add_run("PLAN:")

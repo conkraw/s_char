@@ -21,7 +21,7 @@ def create_word_doc(text):
     intro_run.font.size = Pt(9)   # Set the font size to 9
 
     # Add a line break after the introductory statement
-    doc.add_paragraph()  # This adds a blank line after the intro text
+    #doc.add_paragraph()  # This adds a blank line after the intro text
     
     # Process the rest of the text passed into the function
     sections = text.split('\n')

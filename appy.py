@@ -127,7 +127,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, physical_exam_da
         ros_paragraph.paragraph_format.space_before = Pt(0)
         
         # Fetch the content of the selected ROS file
-        ros_doc = fetch_file_content('ros', ros_file)
+        ros_doc = read_docx_from_url('ros', ros_file)
 
         if ros_doc:
             for para in ros_doc.paragraphs:
@@ -178,7 +178,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, physical_exam_da
         objective_paragraph.paragraph_format.space_before = Pt(0)
 
         # Fetch the content of the selected physical exam day
-        physical_exam_doc = fetch_file_content('physicalexam', physical_exam_day)
+        physical_exam_doc = read_docx_from_url('physicalexam', physical_exam_day)
 
         # Add the fetched content under the OBJECTIVE section
         if physical_exam_doc:

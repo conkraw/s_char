@@ -54,7 +54,7 @@ def create_word_doc(text, ros_text, physical_exam_text):
         run.font.name = 'Arial'
         run.font.size = Pt(9)
 
-        # Check for "ASSESSMENT:" and "PLAN:" to apply bold and underline
+        # Apply bold and underline for specific sections
         if section.startswith("ASSESSMENT:"):
             run.bold = True
             run.underline = True
@@ -65,6 +65,9 @@ def create_word_doc(text, ros_text, physical_exam_text):
             run.bold = True
             run.underline = True
         elif section.startswith("OBJECTIVE:"):
+            run.bold = True
+            run.underline = True
+        elif section.startswith("OVERNIGHT EVENTS:"):  # New addition for OVERNIGHT EVENTS
             run.bold = True
             run.underline = True
         elif section.startswith("CLINICAL INDICATIONS FOR CRITICAL CARE SERVICES:"):
@@ -79,7 +82,6 @@ def create_word_doc(text, ros_text, physical_exam_text):
     output_path = "updated_note.docx"
     doc.save(output_path)
     return output_path
-
 # Title of the app
 st.title("Note Management App")
 

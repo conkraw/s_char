@@ -60,7 +60,7 @@ def create_word_doc(text, ros_text, physical_exam_text):
         # Set single spacing for physical exam section
         p.paragraph_format.space_after = Pt(0)
         p.paragraph_format.space_before = Pt(0)
-        p.paragraph_format.line_spacing = Pt(12)
+        p.paragraph_format.line_spacing = Pt(0)
 
     # Process the rest of the text passed into the function
     sections = text.split('\n')

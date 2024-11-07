@@ -93,12 +93,12 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
 
     # Add "OVERNIGHT EVENTS:" section
     overnight_paragraph = doc.add_paragraph()
-    overnight_header_run = overnight_paragraph.add_run("OVERNIGHT EVENTS: ")
+    overnight_header_run = overnight_paragraph.add_run("OVERNIGHT EVENTS:")
     overnight_header_run.bold = True
     overnight_header_run.underline = True
     overnight_header_run.font.name = 'Arial'
     overnight_header_run.font.size = Pt(9)
-    overnight_content_run = overnight_paragraph.add_run("No acute events were noted overnight.")
+    overnight_content_run = overnight_paragraph.add_run(" No acute events were noted overnight.")
     overnight_content_run.font.name = 'Arial'
     overnight_content_run.font.size = Pt(9)
     overnight_paragraph.paragraph_format.space_after = Pt(6)

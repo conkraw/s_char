@@ -14,6 +14,7 @@ def read_docx_from_url(url):
     return '\n'.join(content)
 
 # Function to create a Word document with specific font settings and single spacing
+# Function to create a Word document with specific font settings and single spacing
 def create_word_doc(text, ros_text, physical_exam_text):
     doc = Document()
 
@@ -37,13 +38,30 @@ def create_word_doc(text, ros_text, physical_exam_text):
         ros_run = ros_paragraph.add_run(ros_text)
         ros_run.font.name = 'Arial'
         ros_run.font.size = Pt(9)
-        
-    # Add Physical Exam (always required)
-    physical_exam_paragraph = doc.add_paragraph()
-    physical_exam_run = physical_exam_paragraph.add_run("OBJECTIVE:\n" + physical_exam_text)
-    physical_exam_run.font.name = 'Arial'
-    physical_exam_run.font.size = Pt(9)
+
+    # Now we handle the "OBJECTIVE:" section and the rest of the physical exam content
+    physical_exam_lines = physical_exam_text.split("\n")
     
+    # Add "OBJECTIVE:" as a bold and underlined section
+    objective_paragraph = doc.add_paragraph()
+    objective_run = objective_paragraph.add_run("OBJECTIVE:")  # Adding OBJECTIVE: header
+    objective_run.bold = True
+    objective_run.underline = True
+    objective_run.font.name = 'Arial'
+    objective_run.font.size = Pt(9)
+    
+    # Add the rest of the physical exam text
+    for line in physical_exam_lines:
+        p = doc.add_paragraph()
+        run = p.add_run(line)
+        run.font.name = 'Arial'
+        run.font.size = Pt(9)
+
+        # Set single spacing for physical exam section
+        p.paragraph_format.space_after = Pt(0)
+        p.paragraph_format.space_before = Pt(0)
+        p.paragraph_format.line_spacing = Pt(12)
+
     # Process the rest of the text passed into the function
     sections = text.split('\n')
     for section in sections:
@@ -54,7 +72,7 @@ def create_word_doc(text, ros_text, physical_exam_text):
         run.font.name = 'Arial'
         run.font.size = Pt(9)
 
-        # Apply bold and underline for specific sections **right before saving the document**
+        # Apply bold and underline for specific sections
         if section.startswith("ASSESSMENT:"):
             run.bold = True
             run.underline = True
@@ -67,7 +85,7 @@ def create_word_doc(text, ros_text, physical_exam_text):
         elif section.startswith("OBJECTIVE:"):
             run.bold = True
             run.underline = True
-        elif section.startswith("OVERNIGHT EVENTS:"):  # Make this section bold and underlined
+        elif section.startswith("OVERNIGHT EVENTS:"):
             run.bold = True
             run.underline = True
         elif section.startswith("CLINICAL INDICATIONS FOR CRITICAL CARE SERVICES:"):

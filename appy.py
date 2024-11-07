@@ -61,13 +61,22 @@ def fetch_file_content(folder_name, file_name, fetch_diagnosis=True):
         st.error(f"An error occurred while fetching content: {e}")
         return None
 
-def read_docx_from_url(url):
+def read_docx_from_urlx(url):
     response = requests.get(url)
     doc = Document(BytesIO(response.content))
     content = []
     for para in doc.paragraphs:
         content.append(para.text)
     return '\n'.join(content)
+
+def read_docx_from_url(url):
+    # Ensure the URL starts with https:// or http://
+    if not url.startswith(('http://', 'https://')):
+        url = 'https://' + url  # Default to https if not present
+
+    response = requests.get(url)
+    doc = Document(BytesIO(response.content))
+    return doc  # Return the Document object, not just the text
     
 # Function to create a Word document with specific font settings and single spacing
 def create_word_doc(text):

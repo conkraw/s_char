@@ -143,7 +143,7 @@ ros_selection = st.selectbox("Select ROS file:", list(ros_files.keys()))
 
 sorted_physical_exam_options = sorted(physical_exam_files.keys(), key=lambda x: (x.split()[0], int(x.split()[2])))
 
-physical_exam_selection = st.selectbox("Select Physical Exam file:", sorted_physical_exam_options)
+physical_exam_selection = st.selectbox("Select Physical Exam file:", list(physical_exam_files.keys()))
 
 # Allow the user to input their text for replacement
 options = ["Continue", "Will continue", "We will continue", "We shall continue"]

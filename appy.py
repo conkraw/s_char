@@ -162,12 +162,31 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     critical_care_paragraph.paragraph_format.space_before = Pt(0)
 
     critical_care_options = [
-        "The patient requires critical care services due to the continuous management of invasive respiratory as well as hemodynamic support, which if not provided, would be life threatening to the patient.",
-        "The patient requires critical care services due to the high risk of neurologic decompensation which could result in airway loss and respiratory failure, which is life threatening to the patient.",
-        "The patient requires critical care services for management of the patient's airway and invasive mechanical respiratory support without which would be life threatening to the patient.",
-        "The patient requires critical care services for management of the patient's airway and non-invasive mechanical respiratory support without which would be life threatening to the patient.",
-        "The patient requires critical care services as the patient is at high risk of withdrawal, and thus requires intensive care monitoring."
-    ]
+    "The patient requires critical care services due to the continuous management of invasive respiratory as well as hemodynamic support, which if not provided, would be life threatening to the patient.",
+    "The patient requires critical care services due to the high risk of neurologic decompensation which could result in airway loss and respiratory failure, which is life threatening to the patient.",
+    "The patient requires critical care services for management of the patient's airway and invasive mechanical respiratory support without which would be life threatening to the patient.",
+    "The patient requires critical care services for management of the patient's airway and non-invasive mechanical respiratory support without which would be life threatening to the patient.",
+    "The patient requires critical care services as the patient is at high risk of withdrawal, and thus requires intensive care monitoring.",
+    "The patient is in a critically unstable condition with immediate risk of multisystem organ failure, including the cardiovascular and respiratory systems.",
+    "The patient exhibits signs of rapid deterioration in respiratory and renal function, requiring intensive monitoring and therapeutic intervention.",
+    "The patient is at high risk for cardiovascular collapse and respiratory failure, necessitating critical care for immediate stabilization.",
+    "The patient's clinical presentation is consistent with impending respiratory and renal failure, with a high risk of further deterioration without intensive monitoring and intervention.",
+    "The patient’s cardiovascular instability and compromised respiratory function place them at risk for immediate life-threatening complications.",
+    "Signs of acute organ dysfunction, particularly in the cardiovascular and respiratory systems, suggest imminent need for intensive care to prevent further deterioration.",
+    "The patient demonstrates significant hemodynamic instability, with potential for rapid deterioration in vital organ function, including the heart and lungs.",
+    "Critical respiratory distress and compromised renal function require close monitoring and intervention to prevent irreversible organ damage.",
+    "The patient is at risk of progressive multi-organ failure, particularly affecting the liver, kidneys, and lungs, and requires continuous intensive care management.",
+    "The patient is experiencing severe cardiovascular instability and respiratory compromise, placing them at imminent risk for arrest without urgent critical care support.",
+    "Acute exacerbation of chronic respiratory failure and unstable hemodynamics place the patient at significant risk for further deterioration, warranting critical care services.",
+    "The patient’s rapidly worsening metabolic acidosis, along with cardiovascular and renal instability, indicates a need for continuous critical care to prevent life-threatening complications.",
+    "Impaired cardiac output and acute respiratory distress syndrome (ARDS) necessitate intensive monitoring and immediate intervention to prevent further organ failure.",
+    "The patient's clinical status is characterized by rapidly declining respiratory function, renal failure, and unstable blood pressure, with imminent risk for multi-organ dysfunction.",
+    "There is significant concern for cardiovascular collapse and respiratory failure due to acute myocardial dysfunction, requiring intensive care interventions to stabilize the patient.",
+    "The patient is critically ill with evidence of acute respiratory and renal failure, requiring immediate and sustained intensive care to support vital organ function.",
+    "The patient is at risk of rapid deterioration in cardiac, respiratory, and renal function, necessitating continuous monitoring and aggressive therapeutic interventions.",
+    "The patient's clinical presentation suggests an impending multi-organ system collapse, particularly affecting the heart, lungs, and kidneys, requiring intensive care to prevent irreversible damage."
+]
+
     
     selected_critical_care = st.selectbox("Clinical Indications for Critical Care Services:", critical_care_options)
     

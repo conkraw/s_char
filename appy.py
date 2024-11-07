@@ -117,7 +117,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     overnight_paragraph.paragraph_format.space_before = Pt(6)
     
     # Add "SUBJECTIVE" header and ROS content
-    if ros_file and ros_file != "None.docx":
+    if ros_file != "None" and ros_file in ros_files:
         ros_paragraph = doc.add_paragraph()
         
         # Add SUBJECTIVE heading (bold, underline)
@@ -131,7 +131,8 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         ros_paragraph.paragraph_format.space_before = Pt(0)
         
         # Fetch the content of the selected ROS file using read_docx_from_url
-        ros_content = read_docx_from_url(ros_file)
+        ros_url = ros_files[ros_file]  # Get the URL from the dictionary
+        ros_content = read_docx_from_url(ros_url)
         
         # Ensure the ROS content is being fetched correctly
         if ros_content:
@@ -142,7 +143,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
                 ros_paragraph.font.size = Pt(9)
     
     # Add Objective section if a physical exam day is selected
-    if physical_exam_day:
+    if pe_selection != "None" and pe_selection in physical_exam_days:
         objective_paragraph = doc.add_paragraph()
         objective_run = objective_paragraph.add_run("OBJECTIVE:")
         objective_run.bold = True
@@ -153,7 +154,8 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         objective_paragraph.paragraph_format.space_before = Pt(0)
     
         # Fetch the content of the selected physical exam day using read_docx_from_url
-        physical_exam_content = read_docx_from_url(physical_exam_day)
+        pe_url = physical_exam_days[pe_selection]  # Get the URL from the dictionary
+        physical_exam_content = read_docx_from_url(pe_url)
     
         # Ensure the physical exam content is being fetched correctly
         if physical_exam_content:
@@ -162,7 +164,6 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
                 objective_paragraph = doc.add_paragraph(line)
                 objective_paragraph.font.name = 'Arial'
                 objective_paragraph.font.size = Pt(9)
-
 
     # Add the Assessment section
     assessment_paragraph = doc.add_paragraph()
@@ -250,10 +251,8 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     
         plan_paragraph.paragraph_format.space_before = Pt(6)
         plan_paragraph.paragraph_format.space_after = Pt(6)
-    
-    output_path = "combined_note.docx"
-    doc.save(output_path)
-    return output_path
+
+    return doc
 
 
 # Title of the app
@@ -264,6 +263,57 @@ st.header("Create a New Note")
 
 # Input for room number
 room_number = st.text_input("Enter Room Number:")
+
+
+ros_files = {
+    "None": "https://raw.githubusercontent.com/conkraw/s_char/main/ros/None.docx",
+    "ROS_PARENT": "https://raw.githubusercontent.com/conkraw/s_char/main/ros/ros_parent.docx",
+    "ROS_RN": "https://raw.githubusercontent.com/conkraw/s_char/main/ros/ros_rn.docx"
+}
+
+physical_exam_days = {
+    "Adolescent Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day0.docx",
+    "Infant Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day0.docx",
+    "Child Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day0.docx",
+    "Chronic Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day0.docx",
+    
+    "Adolescent Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day1.docx",
+    "Infant Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day1.docx",
+    "Child Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day1.docx",
+    "Chronic Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day1.docx",
+    
+    "Adolescent Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day2.docx",
+    "Infant Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day2.docx",
+    "Child Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day2.docx",
+    "Chronic Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day2.docx",
+    
+    "Adolescent Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day3.docx",
+    "Infant Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day3.docx",
+    "Child Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day3.docx",
+    "Chronic Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day3.docx",
+    
+    "Adolescent Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day4.docx",
+    "Infant Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day4.docx",
+    "Child Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day4.docx",
+    "Chronic Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day4.docx",
+    
+    "Adolescent Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day5.docx",
+    "Infant Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day5.docx",
+    "Child Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day5.docx",
+    "Chronic Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day5.docx",
+    
+    "Adolescent Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day6.docx",
+    "Infant Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day6.docx",
+    "Child Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day6.docx",
+    "Chronic Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day6.docx",
+}
+
+
+# Add dropdown for Review of Systems (ROS)
+ros_selection = st.selectbox("Select ROS Document:", list(ros_files.keys()))
+
+# Add dropdown for Physical Exam
+pe_selection = st.selectbox("Select Physical Exam:", list(physical_exam_days.keys()))
 
 
 # Dynamically list available diagnosis documents in the current directory

@@ -4,6 +4,7 @@ from docx.shared import Pt
 import os
 import re
 import requests
+from io import BytesIO
 
 # Function to format diagnosis names
 def format_diagnosis_name(diagnosis):
@@ -15,7 +16,6 @@ def format_diagnosis_name(diagnosis):
 def fetch_files_from_github(folder_name, fetch_diagnoses=True):
     url = f"https://api.github.com/repos/conkraw/s_char/contents/{folder_name}"
     files = []
-
     try:
         # Send GET request to GitHub API to fetch contents of the folder
         response = requests.get(url)
@@ -61,6 +61,14 @@ def fetch_file_content(folder_name, file_name, fetch_diagnosis=True):
         st.error(f"An error occurred while fetching content: {e}")
         return None
 
+def read_docx_from_url(url):
+    response = requests.get(url)
+    doc = Document(BytesIO(response.content))
+    content = []
+    for para in doc.paragraphs:
+        content.append(para.text)
+    return '\n'.join(content)
+    
 # Function to create a Word document with specific font settings and single spacing
 def create_word_doc(text):
     doc = Document()
@@ -118,45 +126,14 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         ros_paragraph.paragraph_format.space_after = Pt(0)
         ros_paragraph.paragraph_format.space_before = Pt(0)
         
-        # Fetch the content of the selected ROS file
-        ros_doc = fetch_file_content('ros', ros_file)
+        # Fetch the content of the selected ROS file using read_docx_from_url
+        ros_content = read_docx_from_url(ros_file)
 
-        if ros_doc:
-            for para in ros_doc.paragraphs:
-                new_paragraph = doc.add_paragraph()
-
-                # Split the paragraph text by the target phrases and apply formatting to those specific phrases
-                text = para.text
-                text_chunks = []
-
-                # Check and split for "OVERNIGHT EVENTS"
-                if "OVERNIGHT EVENTS" in text:
-                    text_chunks.extend(text.split("OVERNIGHT EVENTS"))
-                    text_chunks.insert(1, "OVERNIGHT EVENTS")
-                else:
-                    text_chunks.append(text)
-
-                # Now handle applying bold/underline to "OVERNIGHT EVENTS" and "SUBJECTIVE"
-                formatted_text = []
-                for chunk in text_chunks:
-                    if chunk == "OVERNIGHT EVENTS":
-                        # Apply bold and underline only to "OVERNIGHT EVENTS"
-                        run = new_paragraph.add_run(chunk)
-                        run.bold = True
-                        run.underline = True
-                    elif "SUBJECTIVE" in chunk:
-                        # Apply bold and underline to "SUBJECTIVE"
-                        run = new_paragraph.add_run(chunk)
-                        run.bold = True
-                        run.underline = True
-                    else:
-                        # For normal text, just add as-is
-                        run = new_paragraph.add_run(chunk)
-                    run.font.name = 'Arial'
-                    run.font.size = Pt(9)
-
-                new_paragraph.paragraph_format.space_after = Pt(6)
-                new_paragraph.paragraph_format.space_before = Pt(0)
+        # Add the ROS content to the document
+        if ros_content:
+            ros_paragraph = doc.add_paragraph(ros_content)
+            ros_paragraph.font.name = 'Arial'
+            ros_paragraph.font.size = Pt(9)
 
     # Add Objective section if a physical exam day is selected
     if physical_exam_day:
@@ -169,20 +146,16 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
         objective_paragraph.paragraph_format.space_after = Pt(0)
         objective_paragraph.paragraph_format.space_before = Pt(0)
 
-        # Fetch the content of the selected physical exam day
-        physical_exam_doc = fetch_file_content('physicalexam', physical_exam_day)
+        # Fetch the content of the selected physical exam day using read_docx_from_url
+        physical_exam_content = read_docx_from_url(physical_exam_day)
 
         # Add the fetched content under the OBJECTIVE section
-        if physical_exam_doc:
-            for para in physical_exam_doc.paragraphs:
-                new_paragraph = doc.add_paragraph(para.text)
-                new_paragraph.paragraph_format.space_after = Pt(0)
-                new_paragraph.paragraph_format.space_before = Pt(0)
-                for run in new_paragraph.runs:
-                    run.font.name = 'Arial'
-                    run.font.size = Pt(9)
+        if physical_exam_content:
+            objective_paragraph = doc.add_paragraph(physical_exam_content)
+            objective_paragraph.font.name = 'Arial'
+            objective_paragraph.font.size = Pt(9)
 
-    # Add Assessment section
+    # Add the Assessment section
     assessment_paragraph = doc.add_paragraph()
     assessment_run = assessment_paragraph.add_run("ASSESSMENT:")
     assessment_run.bold = True
@@ -272,6 +245,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     output_path = "combined_note.docx"
     doc.save(output_path)
     return output_path
+
 
 # Title of the app
 st.title("Note Management App")

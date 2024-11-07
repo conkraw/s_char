@@ -12,7 +12,7 @@ def format_diagnosis_name(diagnosis):
     formatted_name = formatted_name.title()
     return formatted_name
 
-# Function to fetch physical exam day files from GitHub repository
+# Function to fetch files from GitHub repository
 def fetch_files_from_github(folder_name):
     url = f"https://api.github.com/repos/conkraw/s_char/contents/{folder_name}"
     files = []
@@ -95,6 +95,37 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
     last_paragraph = doc.add_paragraph()  # Add an empty paragraph
     last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
 
+    # Add Review of Systems section first (if ROS file is selected)
+    if ros_file:
+        ros_paragraph = doc.add_paragraph()
+        ros_run = ros_paragraph.add_run("REVIEW OF SYSTEMS:")
+        ros_run.bold = True
+        ros_run.underline = True
+        ros_run.font.name = 'Arial'
+        ros_run.font.size = Pt(9)
+        ros_paragraph.paragraph_format.space_after = Pt(0)
+        ros_paragraph.paragraph_format.space_before = Pt(0)
+        
+        # Fetch the content of the selected ROS file
+        ros_doc = fetch_file_content('ros', ros_file)
+        
+        # Add the fetched content under the REVIEW OF SYSTEMS section
+        if ros_doc:
+            for para in ros_doc.paragraphs:
+                new_paragraph = doc.add_paragraph(para.text)
+                new_paragraph.paragraph_format.space_after = Pt(0)
+                new_paragraph.paragraph_format.space_before = Pt(0)
+                for run in new_paragraph.runs:
+                    run.font.name = 'Arial'
+                    run.font.size = Pt(9)
+
+            last_paragraph = doc.add_paragraph()  # Add an empty paragraph
+            last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
+            
+            for run in last_paragraph.runs:
+                run.font.name = 'Arial'
+                run.font.size = Pt(9)
+
     # Add Objective section if a physical exam day is selected
     if physical_exam_day:
         objective_paragraph = doc.add_paragraph()
@@ -119,37 +150,6 @@ def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=No
                     run.font.name = 'Arial'
                     run.font.size = Pt(9)
             
-            last_paragraph = doc.add_paragraph()  # Add an empty paragraph
-            last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
-            
-            for run in last_paragraph.runs:
-                run.font.name = 'Arial'
-                run.font.size = Pt(9)
-
-    # Add ROS section if an ROS file is selected
-    if ros_file:
-        ros_paragraph = doc.add_paragraph()
-        ros_run = ros_paragraph.add_run("SUBJECTIVE:")
-        ros_run.bold = True
-        ros_run.underline = True
-        ros_run.font.name = 'Arial'
-        ros_run.font.size = Pt(9)
-        ros_paragraph.paragraph_format.space_after = Pt(0)
-        ros_paragraph.paragraph_format.space_before = Pt(0)
-        
-        # Fetch the content of the selected ROS file
-        ros_doc = fetch_file_content('ros', ros_file)
-        
-        # Add the fetched content under the REVIEW OF SYSTEMS section
-        if ros_doc:
-            for para in ros_doc.paragraphs:
-                new_paragraph = doc.add_paragraph(para.text)
-                new_paragraph.paragraph_format.space_after = Pt(0)
-                new_paragraph.paragraph_format.space_before = Pt(0)
-                for run in new_paragraph.runs:
-                    run.font.name = 'Arial'
-                    run.font.size = Pt(9)
-
             last_paragraph = doc.add_paragraph()  # Add an empty paragraph
             last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
             
@@ -258,5 +258,4 @@ if st.button("Submit New Note"):
             st.download_button("Download Combined Note", f, file_name=file_name)
     else:
         st.error("Please fill out all fields.")
-
 

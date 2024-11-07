@@ -12,11 +12,10 @@ def format_diagnosis_name(diagnosis):
     formatted_name = formatted_name.title()
     return formatted_name
 
-# Function to fetch files from GitHub repository
-def fetch_files_from_github(folder_name):
+def fetch_files_from_github(folder_name, fetch_diagnoses=True):
     url = f"https://api.github.com/repos/conkraw/s_char/contents/{folder_name}"
     files = []
-    
+
     try:
         # Send GET request to GitHub API to fetch contents of the folder
         response = requests.get(url)
@@ -25,8 +24,8 @@ def fetch_files_from_github(folder_name):
             # Parse the response JSON
             response_files = response.json()
             for file in response_files:
-                # Filter out only .docx files
-                if file['name'].endswith('.docx'):
+                # Filter out only .docx files, adjust for diagnosis folder
+                if file['name'].endswith('.docx') and (fetch_diagnoses or folder_name in ["physicalexam", "ros"]):
                     files.append(file['name'])
         else:
             st.error(f"Failed to fetch files: Status code {response.status_code}")
@@ -37,26 +36,27 @@ def fetch_files_from_github(folder_name):
     
     return files
 
-# Function to download and extract content from a document
-def fetch_file_content(folder_name, file_name):
+# Function to download and extract content from a document (for diagnosis fetching)
+def fetch_file_content(folder_name, file_name, fetch_diagnosis=True):
     url = f"https://raw.githubusercontent.com/conkraw/s_char/master/{folder_name}/{file_name}"
+    
     try:
-        # Download the document as raw content
-        response = requests.get(url)
-        
-        if response.status_code == 200:
-            # Save the content as a .docx file locally
-            with open(file_name, "wb") as f:
-                f.write(response.content)
-            
-            # Now read the content from the local file
-            doc = Document(file_name)
-            content = "\n".join([para.text for para in doc.paragraphs])
-            os.remove(file_name)  # Remove the local file after reading content
-            return doc  # Return the Document object, not just plain text
+        # If the folder is diagnoses, proceed to fetch it
+        if fetch_diagnosis:
+            response = requests.get(url)
+            if response.status_code == 200:
+                # Save and process the .docx file
+                with open(file_name, "wb") as f:
+                    f.write(response.content)
+                doc = Document(file_name)
+                content = "\n".join([para.text for para in doc.paragraphs])
+                os.remove(file_name)
+                return doc  # Return the Document object, not just plain text
+            else:
+                st.error(f"Failed to fetch content: Status code {response.status_code}")
+                return None
         else:
-            st.error(f"Failed to fetch content: Status code {response.status_code}")
-            return None
+            return None  # Return None for ROS and physical exam files if not needed
     except requests.exceptions.RequestException as e:
         st.error(f"An error occurred while fetching content: {e}")
         return None
@@ -334,7 +334,6 @@ physical_exam_days = {
 available_docs = [f[:-5] for f in os.listdir('.') if f.endswith('.docx')]
 formatted_conditions = [format_diagnosis_name(doc) for doc in available_docs]
 
-# Sort the formatted conditions alphabetically
 sorted_conditions = sorted(formatted_conditions)
 
 # Add the selection input for ROS file
@@ -380,7 +379,6 @@ critical_care_options = ["",
     "The patient's clinical presentation suggests an impending multi-organ system collapse, particularly affecting the heart, lungs, and kidneys, requiring intensive care to prevent irreversible damage."
 ]
 
-    
 selected_critical_care = st.selectbox("Why Critical Care:", critical_care_options)
 
 # Add the Critical Care Time input (optional)
@@ -401,6 +399,5 @@ if st.button("Submit New Note"):
             st.download_button("Download Combined Note", f, file_name=file_name)
     else:
         st.error("Please fill out all fields.")
-
 
 

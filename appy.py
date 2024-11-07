@@ -3,6 +3,7 @@ from docx import Document
 from docx.shared import Pt
 import os
 import re
+import requests
 
 # Function to format diagnosis names
 def format_diagnosis_name(diagnosis):
@@ -22,17 +23,41 @@ def create_word_doc(text):
         run.font.size = Pt(9)
         p.paragraph_format.space_after = Pt(0)
         p.paragraph_format.space_before = Pt(0)
-        #p.paragraph_format.line_spacing = Pt(12)
-
+    
     output_path = "updated_note.docx"
     doc.save(output_path)
     return output_path
 
+# Function to fetch physical exam days from GitHub
+def get_physical_exam_days():
+    url = "https://raw.githubusercontent.com/conkraw/s_char/master/physicalexam.txt"  # URL to the raw text file
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        return response.text.splitlines()  # Returns a list of days from the file
+    else:
+        st.error("Error fetching physical exam days.")
+        return []
+
 # Function to combine diagnosis documents with formatted input text
-def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=None):
+def combine_notes(assess_text, diagnoses, free_text_diag=None, free_text_plan=None, physical_exam_day=None):
     doc = Document()
     
-    # Assessment section
+    # Add Objective section if a physical exam day is selected
+    if physical_exam_day:
+        objective_paragraph = doc.add_paragraph()
+        objective_run = objective_paragraph.add_run("OBJECTIVE:")
+        objective_run.bold = True
+        objective_run.underline = True
+        objective_run.font.name = 'Arial'
+        objective_run.font.size = Pt(9)
+        objective_paragraph.paragraph_format.space_after = Pt(0)
+        objective_paragraph.paragraph_format.space_before = Pt(0)
+        
+        # Add the selected physical exam day below "OBJECTIVE"
+        doc.add_paragraph(f"Physical Exam Day: {physical_exam_day}")
+    
+    # Add Assessment section
     assessment_paragraph = doc.add_paragraph()
     assessment_run = assessment_paragraph.add_run("ASSESSMENT:")
     assessment_run.bold = True
@@ -109,18 +134,21 @@ diagnosis_mapping = {format_diagnosis_name(doc): doc for doc in available_docs}
 
 selected_conditions = st.multiselect("Choose diagnoses:", sorted_conditions)
 
-# Input for free text diagnosis and plan
-#free_text_diagnosis = st.text_input("Enter Free Text Diagnosis:")
-#free_text_plan = st.text_area("Enter Plan for Free Text Diagnosis:")
-
 assessment_text = st.text_area("Enter Assessment:")
+
+# Get the list of physical exam days from GitHub
+physical_exam_days = get_physical_exam_days()
+
+# Add the selection input for physical exam day
+selected_exam_day = st.selectbox("Select Physical Examination Day:", physical_exam_days)
 
 if st.button("Submit New Note"):
     if selected_conditions and assessment_text and room_number:
-        combined_file = combine_notes(assessment_text, selected_conditions) #free_text_diagnosis,#free_text_plan)
+        combined_file = combine_notes(assessment_text, selected_conditions, physical_exam_day=selected_exam_day)
         file_name = f"{room_number}.docx"
         with open(combined_file, "rb") as f:
             st.download_button("Download Combined Note", f, file_name=file_name)
     else:
         st.error("Please fill out all fields.")
+
 

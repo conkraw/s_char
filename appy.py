@@ -88,7 +88,7 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
     intro_run.italic = True
     intro_run.font.name = 'Arial'
     intro_run.font.size = Pt(9)
-    intro_paragraph.paragraph_format.space_after = Pt(6)
+    intro_paragraph.paragraph_format.space_after = Pt(0)
     intro_paragraph.paragraph_format.space_before = Pt(0)
 
     # Add "OVERNIGHT EVENTS:" section
@@ -157,9 +157,6 @@ def combine_notes(assess_text, critical_care_reason, diagnoses, free_text_diag=N
 
                 new_paragraph.paragraph_format.space_after = Pt(0)
                 new_paragraph.paragraph_format.space_before = Pt(0)
-
-            last_paragraph = doc.add_paragraph()  # Add an empty paragraph
-            last_paragraph.paragraph_format.space_after = Pt(0)  # Set space after to a small value (6 pt)
 
             for run in last_paragraph.runs:
                 run.font.name = 'Arial'

@@ -53,9 +53,6 @@ def create_word_doc(text, ros_text, physical_exam_text):
     intro_run.italic = True  # Set the intro text to be italicized
     intro_run.font.name = 'Arial'  # Set the font to Arial
     intro_run.font.size = Pt(9)   # Set the font size to 9
-
-    # Add a line break after the introductory statement
-    doc.add_paragraph()  # This adds a blank line after the intro text
     
     # Add ROS if selected
     if ros_text:
@@ -79,7 +76,7 @@ def create_word_doc(text, ros_text, physical_exam_text):
         
         # Set font properties for the rest of the document
         run.font.name = 'Arial'
-        run.font.size = Pt(10)
+        run.font.size = Pt(9)
 
         # Check for "ASSESSMENT:" and "PLAN:" to apply bold and underline
         if section.startswith("ASSESSMENT:"):

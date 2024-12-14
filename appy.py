@@ -389,7 +389,8 @@ critical_care_options = ["",
     "The patient is critically ill with evidence of acute respiratory and renal failure, requiring immediate and sustained intensive care to support vital organ function.",
     "The patient is at risk of rapid deterioration in cardiac, respiratory, and renal function, necessitating continuous monitoring and aggressive therapeutic interventions.",
     "The patient's clinical presentation suggests an impending multi-organ system collapse, particularly affecting the heart, lungs, and kidneys, requiring intensive care to prevent irreversible damage.",
-    "The patient requires critical care services due to the potential for rapid deterioration despite initial hemodynamic stability, as a drop in hemoglobin suggests ongoing or unresolved bleeding, risk of oxygenation failure, or possible complications from underlying comorbidities that require intensive monitoring and intervention. 
+    "The patient requires critical care services due to the potential for rapid deterioration despite initial hemodynamic stability, as a drop in hemoglobin suggests ongoing or unresolved bleeding, risk of oxygenation failure, or possible complications from underlying comorbidities that require intensive monitoring and intervention.,
+    "The patient requires critical care services for close monitoring after tonsillectomy and adenoidectomy due to the risk of postoperative complications such as airway obstruction, bleeding, or respiratory distress, which could require immediate intervention."                        
 ]
 
 selected_critical_care = st.selectbox("Why Critical Care:", critical_care_options)

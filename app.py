@@ -16,6 +16,7 @@ PHRASES = ("Continue", "Will continue", "We will continue", "We shall continue")
 CUSTOM = "Custom phrase"
 FULL_NOTE = "Assessment, indications, and plan"
 PLAN_ONLY = "Plan only"
+WORD_FORMAT_VERSION = 2
 
 _INDICATIONS = (
     r"(?:CLINICAL\s+)?INDICATIONS\s+FOR\s+"
@@ -454,6 +455,13 @@ def build_word_note(note_text, action_phrases=()):
         kind = block["kind"]
         if kind == "assessment":
             insert_table(0, block["heading"], block["lines"], add_spacer=False)
+        elif kind == "indications" and block["heading"]:
+            # Both care indications use the same blue heading and bordered
+            # narrative row as ASSESSMENT in the user's updated template.
+            previous = body[-2] if len(body) > 1 else None
+            if previous is None or previous.tag != qn("w:p") or Paragraph(previous, document).text.strip():
+                insert_spacer()
+            insert_table(0, block["heading"], block["lines"])
         elif kind == "plan_heading":
             insert_table(1, block["heading"], [])
         elif kind in ("diagnosis", "plan_body"):
@@ -607,6 +615,7 @@ def main():
                 "input": current_input,
                 "word_bytes": word_bytes,
                 "table_preview": build_table_preview(word_bytes),
+                "format_version": WORD_FORMAT_VERSION,
             }
         except ModuleNotFoundError as error:
             if error.name != "docx":
@@ -622,7 +631,7 @@ def main():
         st.error(st.session_state["note_error"])
 
     saved = st.session_state["note_result"]
-    if saved and "word_bytes" not in saved:
+    if saved and ("word_bytes" not in saved or saved.get("format_version") != WORD_FORMAT_VERSION):
         # A running session can still hold a result from the previous app version.
         st.session_state["note_result"] = None
         saved = None

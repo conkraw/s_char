@@ -1,221 +1,305 @@
-import streamlit as st
-from docx import Document
-from docx.shared import Pt
-import requests
-from io import BytesIO
+"""Update Epic plan wording and return a note that can be copied as plain text.
 
-# Function to read the content of a .docx file from a URL
-def read_docx_from_url(url):
-    response = requests.get(url)
-    doc = Document(BytesIO(response.content))
-    content = []
-    for para in doc.paragraphs:
-        content.append(para.text)
-    return '\n'.join(content)
+Run with: streamlit run app.py
+Only Streamlit is required. Note text stays in the current Streamlit session.
+"""
 
-# Function to create a Word document with specific font settings and single spacing
-# Function to create a Word document with specific font settings and single spacing
-def create_word_doc(text, ros_text, physical_exam_text):
-    doc = Document()
+from dataclasses import dataclass
+from html import escape
+import re
 
-    # The specific phrase to add at the top of the document
-    intro_text = (
-        "I personally examined the patient separately and discussed the case with the resident/physician assistant "
-        "and with any services involved in a multidisciplinary fashion. I agree with the resident/physician's assistant "
-        "documentation with any exceptions noted below:"
+
+PHRASES = ("Continue", "Will continue", "We will continue", "We shall continue")
+CUSTOM = "Custom phrase"
+FULL_NOTE = "Assessment, indications, and plan"
+PLAN_ONLY = "Plan only"
+
+_INDICATIONS = (
+    r"(?:CLINICAL\s+)?INDICATIONS\s+FOR\s+"
+    r"(?:CRITICAL\s+CARE(?:\s+SERVICES)?"
+    r"(?:\s+(?:OR|AND)\s+HOSPITAL\s+CARE(?:\s+SERVICES)?)?"
+    r"|(?:CONTINUED\s+)?HOSPITALIZATION"
+    r"|HOSPITAL\s+(?:CARE(?:\s+SERVICES)?|SERVICES|ADMISSION))"
+)
+_EXCLUDED = (
+    r"PATIENT\s+(?:INFORMATION|INFO)|DIAGNOSES|SUBJECTIVE|OBJECTIVE"
+    r"|INTERVAL\s+EVENTS|OVERNIGHT\s+EVENTS|REVIEW\s+OF\s+SYSTEMS|ROS"
+    r"|PHYSICAL\s+EXAM(?:INATION)?|PE|VITAL\s+SIGNS"
+    r"|ATTESTATION|CRITICAL\s+CARE\s+TIME|TIME\s+SPENT"
+)
+_HEADINGS = re.compile(
+    rf"^(?P<label>ASSESSMENT|PLAN|{_INDICATIONS}|CLINICAL\s+INDICATIONS|{_EXCLUDED})"
+    r"\s*(?::\s*(?P<body>.*))?$",
+    re.IGNORECASE,
+)
+_INDICATIONS_TOKEN = re.compile(r"^\{CKCLININDICATIONS:[^}]+\}$", re.IGNORECASE)
+_LIST_MARKER = r"(?:\d+(?:\)\.?|[.)])|\(\d+\)|[a-zA-Z][.)]|[-\u2022\u25cf\u25aa\u2023])"
+_MARKER_ONLY = re.compile(rf"^{_LIST_MARKER}$")
+
+
+@dataclass(frozen=True)
+class NoteResult:
+    text: str
+    replacements: int
+    sections: tuple
+
+
+def normalize_pasted_text(text):
+    """Turn table cell separators into lines, retaining clinical text and lists."""
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = text.replace("\u00a0", " ")
+    for separator in ("\x07", "\x0b", "\x0c", "\u2028", "\u2029"):
+        text = text.replace(separator, "\n")
+
+    lines = []
+    for raw_line in text.split("\n"):
+        if not raw_line.strip():
+            lines.append("")
+            continue
+        # A clipboard table can use tabs for cells or for list-number spacing.
+        cells = [cell.strip() for cell in raw_line.split("\t") if cell.strip()]
+        for cell in cells:
+            if lines and _MARKER_ONLY.fullmatch(lines[-1]):
+                lines[-1] += " " + cell
+            else:
+                lines.append(cell)
+    return "\n".join(lines).strip()
+
+
+def identify_heading(line):
+    """Classify explicit note headings without guessing from diagnoses."""
+    candidate = line.strip()
+    if _INDICATIONS_TOKEN.fullmatch(candidate):
+        return "indications"
+    # Accept Markdown-wrapped headings while leaving their source text intact.
+    candidate = re.sub(r"^#{1,6}\s+", "", candidate)
+    candidate = re.sub(r"^(\*\*|__)(.+?)\1", r"\2", candidate)
+    match = _HEADINGS.fullmatch(candidate)
+    if not match:
+        return None
+    label = re.sub(r"\s+", " ", match.group("label")).upper()
+    if label == "ASSESSMENT":
+        return "assessment"
+    if label == "PLAN":
+        return "plan"
+    if "INDICATIONS" in label:
+        return "indications"
+    return "excluded"
+
+
+def _phrase_pattern(phrase):
+    return r"[ \t]+".join(re.escape(word) for word in phrase.split())
+
+
+def replace_plan_starters(text, source_phrase, replacement_phrase):
+    """Replace instruction starters, not words inside other clinical sentences."""
+    if source_phrase.casefold() == replacement_phrase.casefold():
+        return text, 0
+    source = _phrase_pattern(source_phrase)
+    target = re.compile(_phrase_pattern(replacement_phrase) + r"(?!\w)", re.IGNORECASE)
+    starter = re.compile(
+        r"(?P<prefix>(?:^|(?<=[.!?:;])[ \t]+)[ \t]*"
+        rf"(?:{_LIST_MARKER}[ \t]*)*(?:[\"\u201c])?)"
+        rf"(?P<phrase>{source})(?!\w)",
+        re.IGNORECASE,
     )
-    
-    # Add the introductory text as a paragraph, italicized, with Arial font and size 9
-    intro_paragraph = doc.add_paragraph()
-    intro_run = intro_paragraph.add_run(intro_text)
-    intro_run.italic = True  # Set the intro text to be italicized
-    intro_run.font.name = 'Arial'  # Set the font to Arial
-    intro_run.font.size = Pt(9)   # Set the font size to 9
-    
-    # Add the "OVERNIGHT EVENTS:" header and its content
-    overnight_paragraph = doc.add_paragraph()
-    
-    # "OVERNIGHT EVENTS:" header
-    overnight_header_run = overnight_paragraph.add_run("OVERNIGHT EVENTS:")
-    overnight_header_run.bold = True
-    overnight_header_run.underline = True
-    overnight_header_run.font.name = 'Arial'
-    overnight_header_run.font.size = Pt(9)
-    
-    # "No acute events were noted overnight" content (no bold/underline)
-    overnight_content_run = overnight_paragraph.add_run(" No acute events were noted overnight")
-    overnight_content_run.font.name = 'Arial'
-    overnight_content_run.font.size = Pt(9)
-    
-    # Add ROS if selected
-    if ros_text:
-        ros_paragraph = doc.add_paragraph()
-        
-        # Add ROS heading (e.g., "SUBJECTIVE:")
-        ros_run = ros_paragraph.add_run("SUBJECTIVE: ")
-        ros_run.bold = True
-        ros_run.underline = True
-        ros_run.font.name = 'Arial'
-        ros_run.font.size = Pt(9)
+    replacements = 0
 
-        # Add the content of the ROS text
-        ros_content_run = ros_paragraph.add_run("\n" + ros_text)
-        ros_content_run.font.name = 'Arial'
-        ros_content_run.font.size = Pt(9)
-        ros_content_run.italic = True 
-        
-    # Now we handle the "OBJECTIVE:" section and the rest of the physical exam content
-    physical_exam_lines = physical_exam_text.split("\n")
-    
-    # Add "OBJECTIVE:" directly to the same paragraph as the content
-    physical_exam_paragraph = doc.add_paragraph()
-    objective_run = physical_exam_paragraph.add_run("OBJECTIVE: ")  # Adding OBJECTIVE: header
-    objective_run.bold = True
-    objective_run.underline = True
-    objective_run.font.name = 'Arial'
-    objective_run.font.size = Pt(9)
+    def substitute(match):
+        nonlocal replacements
+        # Also makes custom replacements such as 'Continue with' idempotent.
+        if target.match(text, match.start("phrase")):
+            return match.group(0)
+        replacements += 1
+        return match.group("prefix") + replacement_phrase
 
-    # Add the rest of the physical exam content in the same paragraph
-    for line in physical_exam_lines:
-        run = physical_exam_paragraph.add_run("\n" + line)
-        run.font.name = 'Arial'
-        run.font.size = Pt(9)
-
-    # Process the rest of the text passed into the function
-    sections = text.split('\n')
-    for section in sections:
-        p = doc.add_paragraph()
-        run = p.add_run(section)
-        
-        # Set font properties for the rest of the document
-        run.font.name = 'Arial'
-        run.font.size = Pt(9)
-
-        # Apply bold and underline for specific sections
-        if section.startswith("ASSESSMENT:"):
-            run.bold = True
-            run.underline = True
-        elif section.startswith("CLINICAL INDICATIONS FOR CRITICAL CARE SERVICES:"):
-            run.bold = True
-            run.underline = True
-        elif section.startswith("PLAN:"):
-            run.bold = True
-            run.underline = True
-            
-        # Set single spacing
-        p.paragraph_format.space_after = Pt(0)
-        p.paragraph_format.space_before = Pt(0)
-        p.paragraph_format.line_spacing = Pt(12)
-
-    # Saving the final document with the required formatting applied
-    output_path = "updated_note.docx"
-    doc.save(output_path)
-    return output_path
+    return starter.sub(substitute, text), replacements
 
 
-# Title of the app
-st.title("Note Management App")
+def update_note(raw_text, source_phrase="Continue", replacement_phrase="Will continue", input_mode=FULL_NOTE):
+    """Keep assessment/indications/plan and change only plan instruction wording.
 
-st.header("Update an Existing Note")
+    A full-note paste needs a separate PLAN heading. Plan-only input is explicit
+    so an unrecognized full note is never silently treated as a plan.
+    """
+    if not isinstance(raw_text, str) or not raw_text.strip():
+        raise ValueError("Paste the note you want to update.")
+    for phrase in (source_phrase, replacement_phrase):
+        if not isinstance(phrase, str) or not phrase.strip():
+            raise ValueError("Enter both the phrase to find and its replacement.")
+        if "\n" in phrase or "\r" in phrase or "\t" in phrase:
+            raise ValueError("Each wording choice must be a single phrase on one line.")
+    if input_mode not in (FULL_NOTE, PLAN_ONLY):
+        raise ValueError("Choose the full note or plan-only input option.")
 
-room_input = st.text_input("Enter Room Number:")
+    source_phrase = source_phrase.strip()
+    replacement_phrase = replacement_phrase.strip()
+    lines = normalize_pasted_text(raw_text).split("\n")
+    has_plan_heading = any(identify_heading(line) == "plan" for line in lines)
+    if input_mode == FULL_NOTE and not has_plan_heading:
+        raise ValueError(
+            "A separate PLAN heading was not found. Include that heading when "
+            "pasting the note, or select Plan only if you pasted just the plan."
+        )
+    if input_mode == PLAN_ONLY and not has_plan_heading:
+        lines = ["PLAN", ""] + lines
 
-# Use session state to manage the text area content
-if 'paragraph_text' not in st.session_state:
-    st.session_state.paragraph_text = ""
+    output = []
+    sections = []
+    current_section = None
+    replacements = 0
+    for line in lines:
+        heading = identify_heading(line)
+        if heading:
+            current_section = None if heading == "excluded" else heading
+            if current_section and current_section not in sections:
+                sections.append(current_section)
+        if current_section is None:
+            continue
+        if current_section == "plan":
+            # A heading may have its first instruction on the same line.
+            line, changed = replace_plan_starters(line, source_phrase, replacement_phrase)
+            replacements += changed
+        output.append(line)
 
-st.session_state.paragraph_text = st.text_area("Enter the text for the note you want to update:", value=st.session_state.paragraph_text)
-
-# Hardcode the URLs for ROS and Physical Exam files on GitHub
-ros_files = {
-    "None": "https://raw.githubusercontent.com/conkraw/s_char/main/ros/None.docx",
-    "ROS_PARENT": "https://raw.githubusercontent.com/conkraw/s_char/main/ros/ros_parent.docx",
-    "ROS_RN": "https://raw.githubusercontent.com/conkraw/s_char/main/ros/ros_rn.docx"
-}
-
-physical_exam_files = {
-    "Adolescent Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day0.docx",
-    "Infant Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day0.docx",
-    "Child Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day0.docx",
-    "Chronic Day 0": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day0.docx",
-    
-    "Adolescent Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day1.docx",
-    "Infant Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day1.docx",
-    "Child Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day1.docx",
-    "Chronic Day 1": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day1.docx",
-    
-    "Adolescent Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day2.docx",
-    "Infant Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day2.docx",
-    "Child Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day2.docx",
-    "Chronic Day 2": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day2.docx",
-    
-    "Adolescent Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day3.docx",
-    "Infant Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day3.docx",
-    "Child Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day3.docx",
-    "Chronic Day 3": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day3.docx",
-    
-    "Adolescent Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day4.docx",
-    "Infant Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day4.docx",
-    "Child Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day4.docx",
-    "Chronic Day 4": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day4.docx",
-    
-    "Adolescent Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day5.docx",
-    "Infant Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day5.docx",
-    "Child Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day5.docx",
-    "Chronic Day 5": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day5.docx",
-    
-    "Adolescent Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Adolescent_Physical_Exam_Day6.docx",
-    "Infant Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Infant_Physical_Exam_Day6.docx",
-    "Child Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Child_Physical_Exam_Day6.docx",
-    "Chronic Day 6": "https://raw.githubusercontent.com/conkraw/s_char/main/physicalexam/Chronic_Physical_Exam_Day6.docx",
-}
+    result = re.sub(r"\n{3,}", "\n\n", "\n".join(output)).strip()
+    if not result:
+        raise ValueError("No assessment, clinical indications, or plan text was found.")
+    return NoteResult(result, replacements, tuple(sections))
 
 
-# Dropdowns for selecting ROS and Physical Exam files
-ros_selection = st.selectbox("Select ROS file:", list(ros_files.keys()))
+def build_copy_panel(note_text):
+    """Render literal, selectable note text with a clipboard button and fallback."""
+    return """<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; font-family: system-ui, sans-serif; }
+  label { display: block; font-size: 14px; margin-bottom: 8px; }
+  textarea { box-sizing: border-box; width: 100%; height: 420px;
+    padding: 14px; border: 1px solid #888; border-radius: 8px;
+    font: 15px/1.5 system-ui, sans-serif; resize: vertical; }
+  button { margin-top: 12px; padding: 9px 18px; border: 1px solid #888;
+    border-radius: 7px; font: 600 14px system-ui, sans-serif; cursor: pointer; }
+  button:focus-visible, textarea:focus-visible { outline: 3px solid #597dbd; }
+  #copy-status { display: inline-block; margin: 10px; font-size: 14px; }
+</style></head>
+<body>
+<label for="epic-note">Updated note</label>
+<textarea id="epic-note" readonly spellcheck="false">""" + escape(note_text) + """</textarea>
+<button type="button" id="copy-note">Copy note</button>
+<span id="copy-status" role="status" aria-live="polite"></span>
+<script>
+  const note = document.getElementById('epic-note');
+  const status = document.getElementById('copy-status');
+  document.getElementById('copy-note').addEventListener('click', async () => {
+    try {
+      if (!navigator.clipboard || !window.isSecureContext) throw new Error('fallback');
+      await navigator.clipboard.writeText(note.value);
+      status.textContent = 'Copied. Paste into Epic.';
+    } catch (error) {
+      note.focus();
+      note.select();
+      note.setSelectionRange(0, note.value.length);
+      let copied = false;
+      try { copied = document.execCommand('copy'); } catch (copyError) {}
+      status.textContent = copied ? 'Copied. Paste into Epic.' :
+        'Text selected. Press Ctrl+C or Command+C, then paste into Epic.';
+    }
+  });
+</script>
+</body></html>"""
 
-sorted_physical_exam_options = sorted(physical_exam_files.keys(), key=lambda x: (x.split()[0], int(x.split()[2])))
 
-physical_exam_selection = st.selectbox("Select Physical Exam file:", list(physical_exam_files.keys()))
+def main():
+    import streamlit as st
 
-# Allow the user to input their text for replacement
-options = ["Continue", "Will continue", "We will continue", "We shall continue"]
-col1, col2 = st.columns(2)
+    st.set_page_config(page_title="Epic Plan Updater", layout="wide")
+    st.title("Epic Plan Updater")
+    st.caption(
+        "Paste your assessment, clinical indications, and plan. "
+        "Update the plan wording, then copy the result into Epic."
+    )
 
-with col1:
-    selected_option = st.selectbox("Select a phrase to replace:", options)
+    defaults = {
+        "note_input": "",
+        "note_result": None,
+        "note_error": "",
+        "input_mode": FULL_NOTE,
+        "source_choice": "Continue",
+        "replacement_choice": "Will continue",
+        "custom_source": "",
+        "custom_replacement": "",
+    }
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
 
-with col2:
-    replacement = st.selectbox("Select a replacement phrase:", options)
+    input_mode = st.radio("Pasted content", (FULL_NOTE, PLAN_ONLY), key="input_mode", horizontal=True)
+    note_input = st.text_area(
+        "Paste from Epic here",
+        key="note_input",
+        height=310,
+        help="Copied table text is accepted. Include the PLAN heading when pasting a full note.",
+    )
+    left, right = st.columns(2)
+    with left:
+        source_choice = st.selectbox("Find phrase", PHRASES + (CUSTOM,), key="source_choice")
+        source = st.text_input("Phrase to find", key="custom_source") if source_choice == CUSTOM else source_choice
+    with right:
+        replacement_choice = st.selectbox("Replace with", PHRASES + (CUSTOM,), key="replacement_choice")
+        replacement = (
+            st.text_input("Replacement phrase", key="custom_replacement")
+            if replacement_choice == CUSTOM else replacement_choice
+        )
+    st.caption("Wording changes apply to plan instructions. Assessment and clinical indications keep their wording.")
 
-# Construct the URLs for the selected files
-ros_url = ros_files[ros_selection]
-physical_exam_url = physical_exam_files[physical_exam_selection]
+    def clear_note():
+        st.session_state["note_input"] = ""
+        st.session_state["note_result"] = None
+        st.session_state["note_error"] = ""
 
-ros_text = read_docx_from_url(ros_url)  # Fetch the content of ROS file
-physical_exam_text = read_docx_from_url(physical_exam_url)  # Fetch the content of Physical Exam file
+    current_input = (note_input, source, replacement, input_mode)
+    action, clear = st.columns(2)
+    with action:
+        generate = st.button("Update note", type="primary")
+    with clear:
+        st.button("Clear note", on_click=clear_note)
 
-if st.button("Replace"):
-    if st.session_state.paragraph_text:
-        # Perform replacement
-        updated_text = st.session_state.paragraph_text.replace(selected_option, replacement)
-        
-        # Create the Word document
-        word_file = create_word_doc(updated_text, ros_text, physical_exam_text)
-        
-        # Ensure room input is valid for filename
-        if room_input:
-            file_name = f"u_{room_input}.docx"
+    if generate:
+        st.session_state["note_result"] = None
+        st.session_state["note_error"] = ""
+        try:
+            result = update_note(note_input, source, replacement, input_mode)
+            st.session_state["note_result"] = {
+                "text": result.text,
+                "replacements": result.replacements,
+                "input": current_input,
+            }
+        except ValueError as error:
+            st.session_state["note_error"] = str(error)
+
+    if st.session_state["note_error"]:
+        st.error(st.session_state["note_error"])
+
+    saved = st.session_state["note_result"]
+    if saved and saved["input"] != current_input:
+        st.info("The note or wording choices have changed. Select Update note to refresh the result.")
+    elif saved:
+        count = saved["replacements"]
+        if count:
+            st.success(f"Updated {count} plan {'phrase' if count == 1 else 'phrases'}.")
         else:
-            file_name = "updated_note.docx"
+            st.info("No plan phrases needed replacement. The retained note is below.")
+        panel = build_copy_panel(saved["text"])
+        if hasattr(st, "iframe"):
+            st.iframe(panel, height=530)
+        else:
+            # Preserve compatibility with existing apps on older Streamlit.
+            import streamlit.components.v1 as components
 
-        with open(word_file, "rb") as f:
-            st.download_button("Download Updated Note", f, file_name=file_name)
-
-        # Clear the text area
-        st.session_state.paragraph_text = ""  # Clear the text area
-        st.success("Replacement done! Text area cleared.")
-    else:
-        st.error("Please enter some text to update.")
+            components.html(panel, height=530, scrolling=True)
 
 
+if __name__ == "__main__":
+    main()
